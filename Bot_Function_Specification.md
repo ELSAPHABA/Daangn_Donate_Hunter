@@ -17,7 +17,7 @@
             - "해당되는 동네가 없습니다. 다시 입력해주세요." Button(돌아가기)
     - Button(구독 동네 삭제)
         - "삭제하실 동네를 선택하세요." Button(동네이름), Button(돌아가기)
-        - "[XX도 XX시 (XX구) XX동]이 삭제되었습니다." Button(돌아가기)
+            - "[XX도 XX시 (XX구) XX동]이 삭제되었습니다." Button(돌아가기)
     - Button(알림 설정)
         - Button(알림 시작 / 알림 중지), Button(돌아가기)
 
