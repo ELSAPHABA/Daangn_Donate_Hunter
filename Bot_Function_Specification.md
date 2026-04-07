@@ -9,7 +9,7 @@
 ## 2. Telegram bot UI/UX 설계
 - **Markup+Button**
     - Button(구독 동네 조회)
-        - "현재 구독중인 동네입니다." (동네이름), Button(돌아가기)
+        - "현재 구독중인 동네입니다: - (동네이름)", Button(돌아가기)
     - Button(구독 동네 추가)
         - "추가하실 동네를 입력해 주세요. [XX도 XX시 (XX구) XX동] 형식으로 입력해 주세요." Button(돌아가기)
             - "[XX도 XX시 (XX구) XX동]이 추가되었습니다." Button(돌아가기)
