@@ -1,6 +1,6 @@
-# Daangn_Donate_Hunter_bot - 상세 기능 명세서
+# Daangn_Donate_Hunter: Telegram-bot - 상세 기능 명세서
 
-당근마켓에서 특정 동네에서의 나눔 상품을 탐지하고, 실시간으로 텔레그램으로 알려주는 텔레그램 봇 구현 상세 가이드
+당근마켓 동네에서의 나눔 상품을 탐지하고, 실시간으로 텔레그램으로 알려주는 텔레그램 봇 구현 상세 가이드
 
 ## 1. 프로젝트 개요
 - **목표**: 특정 주기로 당근마켓 웹 페이지를 스크래핑 해, 특정 동네에서 최신 나눔 상품이 올라왔을 경우 실시간으로 텔레그램으로 알려주는 텔레그램 봇 구현
@@ -9,10 +9,12 @@
 ## 2. Telegram bot UI/UX 설계
 - **/start**
     - 초기
-        - "당근마켓에서 동네의 나눔 상품을 탐지합니다. 탐지 동네 및 키워드, 알림을 설정하시려면 /settings를 입력해 주세요."
+        - "당근마켓에서 동네의 나눔 상품을 탐지합니다. 탐지 동네 및 키워드, 알림을 설정하시려면 /settings를, 도움말은 /help를 입력해 주세요."
+        - CustomKeyboard 팝업
 
-- **Markup+Button**
-    - /settings 입력시 응답
+- **/settings**
+    - Markup+Button
+    - CustomKeyboard 팝업
     - Button(탐지 동네 설정)
         - Button(탐지 동네 조회)
             - "현재 탐지중인 동네입니다: - ([동네이름])", Button(돌아가기)
@@ -39,6 +41,11 @@
     - Button(알림 설정)
         - Button(알림 시작 / 알림 중지), Button(돌아가기)
 
+- **/help**
+    - /keyboardon: "키보드 버튼 켜기"
+    - /keyboardoff: "키보드 버튼 끄기"
+    - /settings: "탐지 및 알림 설정"
+
 - **CustomKeyboard**
     - 탐지 동네 설정
         - 탐지 동네 조회
@@ -52,11 +59,6 @@
         - 돌아가기
     - 알림 설정
     - 키보드 끄기
-        
-- **/help**
-    - /keyboardon: "키보드 버튼 켜기"
-    - /keyboardoff: "키보드 버튼 끄기"
-    - /settings: "탐지 및 알람 설정"
 
 ## 3. 핵심 기능 구현 상세
 ### 3.1 나눔 상품 스크래핑 탐지
@@ -78,9 +80,14 @@
     - dict + JSON
 
 - **동네 주소 스크래핑 수집**:
+    - https://www.daangn.com/kr/buy-sell/s/?in=<번호>
     - 1달에 1번 또는 유저 요청시 실행
     - 마지막 번호 이후부터 탐색
     - User-Agent Mixer
-- 
+        - 추적 및 차단을 피하기 위해 User-Agent를 주기적으로 교체
+        - user-agents.py, user-agents.txt를 참고해 적절히 변형해 사용
+    - '#main-content > div._1j555bm0.sprinkles_paddingLeft_4_base__1byufe8g6.sprinkles_paddingLeft_10_small__1byufe8gr.sprinkles_paddingLeft_16_medium__1byufe8h4.sprinkles_paddingLeft_20_large__1byufe8h9.sprinkles_paddingRight_4_base__1byufe8e2.sprinkles_paddingRight_10_small__1byufe8en.sprinkles_paddingRight_16_medium__1byufe8f0.sprinkles_paddingRight_20_large__1byufe8f5.sprinkles_backgroundColor_layerDefault__1byufe8n.sprinkles_width_full_base__1byufe84q > div > div > h1' 의 text값에서, "중고거래" 키워드 제외한 주소값만 저장
+    - 같은 주소가 여러 번호로 중복 수집될 경우 마지막 수집된 번호로 저장
+    
 ### 3.? 텔레그램 봇 구현
 - 
