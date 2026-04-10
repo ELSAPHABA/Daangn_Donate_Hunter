@@ -45,6 +45,11 @@
     - /keyboardon: "키보드 버튼 켜기"
     - /keyboardoff: "키보드 버튼 끄기"
     - /settings: "탐지 및 알림 설정"
+    - /help: "도움말"
+
+- **/manage**
+    - Button(오류 로그 조회)
+
 
 - **CustomKeyboard**
     - 탐지 동네 설정
@@ -69,10 +74,11 @@
     - 상품 키워드: &search=<키워드>
         - 상품 멀티 키워드 (AND): &search=<키워드>+<키워드>
         - 스페이스는 +로 대체
-    - 거래 가능만 보기: &only_on_sale=true
 
 - **상품 링크 수집 및 비교**
     - 가장 최신 상품 링크 Selector: '#main-content > div._1j555bm0.sprinkles_paddingLeft_4_base__1byufe8g6.sprinkles_paddingLeft_10_small__1byufe8gr.sprinkles_paddingLeft_16_medium__1byufe8h4.sprinkles_paddingLeft_20_large__1byufe8h9.sprinkles_paddingRight_4_base__1byufe8e2.sprinkles_paddingRight_10_small__1byufe8en.sprinkles_paddingRight_16_medium__1byufe8f0.sprinkles_paddingRight_20_large__1byufe8f5.sprinkles_backgroundColor_layerDefault__1byufe8n.sprinkles_width_full_base__1byufe84q > div > section > div > div._12b29ll0.sprinkles_width_full_base__1byufe84q._12b29ll1 > a:nth-child(1)' 의 herf 링크값
+    - 링크값이 변경되었을 경우 새 상품으로 판단하여 텔레그램 봇으로 알림 전송
+    - 스크래핑에 실패했을 경우 오류 로그 기록
 
 ### 3.? 동네 주소 수집 및 DB 저장
 - **동네 주소 DB**:
@@ -88,6 +94,15 @@
         - user-agents.py, user-agents.txt를 참고해 적절히 변형해 사용
     - '#main-content > div._1j555bm0.sprinkles_paddingLeft_4_base__1byufe8g6.sprinkles_paddingLeft_10_small__1byufe8gr.sprinkles_paddingLeft_16_medium__1byufe8h4.sprinkles_paddingLeft_20_large__1byufe8h9.sprinkles_paddingRight_4_base__1byufe8e2.sprinkles_paddingRight_10_small__1byufe8en.sprinkles_paddingRight_16_medium__1byufe8f0.sprinkles_paddingRight_20_large__1byufe8f5.sprinkles_backgroundColor_layerDefault__1byufe8n.sprinkles_width_full_base__1byufe84q > div > div > h1' 의 text값에서, "중고거래" 키워드 제외한 주소값만 저장
     - 같은 주소가 여러 번호로 중복 수집될 경우 마지막 수집된 번호로 저장
+    - 스크래핑에 실패했을 경우 오류 로그 기록
     
 ### 3.? 텔레그램 봇 구현
-- 
+-  멀티 유저 서비스를 위한 chat_id, detect_link JSON 저장
+    - chat_id:
+    - detect_link
+        - 당근 기본 링크 + 동네 (&in=<번호>) + 키워드 (&search=<키워드>)
+        - 0개~n개
+-  유저별 탐지 설정 관리
+    - 탐지 동네 설정
+    - 탐지 키워드 설정
+    - 알림 설정
