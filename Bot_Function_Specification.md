@@ -4,7 +4,13 @@
 
 ## 1. 프로젝트 개요
 - **목표**: 특정 주기로 당근마켓 웹 페이지를 스크래핑 해, 특정 동네에서 최신 나눔 상품이 올라왔을 경우 실시간으로 텔레그램으로 알려주는 텔레그램 봇 구현
-- **기술 스택**: python-telegram-bot, beautifulsoup, ????
+- **기술 스택**: python-telegram-bot, beautifulsoup, requests, user-agents, json, logging
+- **주요 기능**:
+    - 나눔 상품 탐지: 특정 동네 및 키워드 조합으로 당근마켓 웹 페이지를 스크래핑 해 최신 나눔 상품 탐지
+    - 텔레그램 알림: 탐지된 나눔 상품 정보를 텔레그램으로 실시간 전송
+    - 유저 설정 관리: 탐지 동네, 키워드, 알림 설정을 텔레그램 봇 UI에서 관리
+    - 오류 로그 기록: 스크래핑 실패 및 기타 오류 발생 시 로그 기록
+    - 동네 주소 스크래핑: 당근마켓에서 사용되는 동네 주소를 스크래핑 해 DB에 저장
 
 ## 2. Telegram bot UI/UX 설계
 - **/start**
@@ -76,7 +82,16 @@
         - 스페이스는 +로 대체
 
 - **상품 링크 수집 및 비교**
+    - 1분마다 스크래핑 실행
+    - 탐지 동네 및 키워드 조합으로 링크 쿼리 생성
+    - Requests의 proxies 옵션 활용해 프록시 서버를 통한 요청으로 IP 차단 방지
+        - USER, PASS, HOST[1]~HOST[12], PORT는 .env 관리
+        - HOST는 15분마다 교체
+    - User-Agent Mixer
+        - 추적 및 차단을 피하기 위해 User-Agent를 주기적으로 교체
+        - user-agents.py, user-agents.txt를 참고해 적절히 변형해 사용
     - 가장 최신 상품 링크 Selector: '#main-content > div._1j555bm0.sprinkles_paddingLeft_4_base__1byufe8g6.sprinkles_paddingLeft_10_small__1byufe8gr.sprinkles_paddingLeft_16_medium__1byufe8h4.sprinkles_paddingLeft_20_large__1byufe8h9.sprinkles_paddingRight_4_base__1byufe8e2.sprinkles_paddingRight_10_small__1byufe8en.sprinkles_paddingRight_16_medium__1byufe8f0.sprinkles_paddingRight_20_large__1byufe8f5.sprinkles_backgroundColor_layerDefault__1byufe8n.sprinkles_width_full_base__1byufe84q > div > section > div > div._12b29ll0.sprinkles_width_full_base__1byufe84q._12b29ll1 > a:nth-child(1)' 의 herf 링크값
+    - 마지막 탐지 시점의 가장 최신 상품 링크와 비교
     - 링크값이 변경되었을 경우 새 상품으로 판단하여 텔레그램 봇으로 알림 전송
     - 스크래핑에 실패했을 경우 오류 로그 기록
 
@@ -89,6 +104,9 @@
     - https://www.daangn.com/kr/buy-sell/s/?in=<번호>
     - 1달에 1번 또는 유저 요청시 실행
     - 마지막 번호 이후부터 탐색
+    - Requests의 proxies 옵션 활용해 프록시 서버를 통한 요청으로 IP 차단 방지
+        - USER, PASS, HOST[1]~HOST[12], PORT는 .env 관리
+        - HOST는 15분마다 교체
     - User-Agent Mixer
         - 추적 및 차단을 피하기 위해 User-Agent를 주기적으로 교체
         - user-agents.py, user-agents.txt를 참고해 적절히 변형해 사용
