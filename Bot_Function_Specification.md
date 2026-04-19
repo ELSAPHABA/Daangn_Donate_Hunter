@@ -86,6 +86,7 @@
     - 탐지 동네 및 키워드 조합으로 링크 쿼리 생성
     - Requests의 proxies 옵션 활용해 프록시 서버를 통한 요청으로 IP 차단 방지
         - USER, PASS, HOST[1]~HOST[12], PORT는 .env 관리
+            - Github Actions에서 .env 파일을 secrets로 관리
         - HOST는 15분마다 교체
     - User-Agent Mixer
         - 추적 및 차단을 피하기 위해 User-Agent를 주기적으로 교체
@@ -106,6 +107,7 @@
     - 마지막 번호 이후부터 탐색
     - Requests의 proxies 옵션 활용해 프록시 서버를 통한 요청으로 IP 차단 방지
         - USER, PASS, HOST[1]~HOST[12], PORT는 .env 관리
+            - Github Actions에서 .env 파일을 secrets로 관리
         - HOST는 15분마다 교체
     - User-Agent Mixer
         - 추적 및 차단을 피하기 위해 User-Agent를 주기적으로 교체
@@ -124,3 +126,25 @@
     - 탐지 동네 설정
     - 탐지 키워드 설정
     - 알림 설정
+
+### 3.? 오류 로그 기록
+- 스크래핑 실패 및 기타 오류 발생 시 로그 기록
+- 로그 파일: error.log
+- 로그 포맷: [날짜 시간] [오류 유형] 오류 메시지
+- 로그 레벨: ERROR
+- 로그 기록 시점: 스크래핑 실패, 텔레그램 메시지 전송 실패, 기타 예외 발생 시
+
+### 4. Github Actions CI/CD 설정
+- **자동 배포**: main 브랜치에 푸시될 때마다 자동으로 배포되도록 설정
+- **환경 변수 관리**: .env 파일을 secrets로 관리하여 Github Actions 과정에서 생성할 수 있도록 설정
+- **테스트 스크립트**: 배포 전에 간단한 테스트 스크립트를 실행하여 주요 기능이 정상적으로 작동하는지 확인
+- **배포 스크립트**: 배포 스크립트를 작성하여 자동으로 서버에 코드를 배포하고 필요한 서비스를 재시작하도록 설정
+    - git pull & systemctl restart 방식
+        - .env 파일 생성 및 토큰 주입
+        - pip install pyproject.toml
+    - docker build & run 방식
+        - restart unless-stopped
+        - env-file
+        - v
+    - 양 방식 모두 작성 및 선택적으로 실행할 수 있도록 설정
+    - docker 방식은 주석 처리
