@@ -144,8 +144,8 @@
                                 "dong_name": "서초동",
                                 "code": "67890"
                             },
-                            "keyword": "맥북",
-                            "detect_link": "https://www.daangn.com/search?in=67890&search=맥북"
+                            "keyword": "맥북 중고",
+                            "detect_link": "https://www.daangn.com/search?in=67890&search=맥북+중고"
                             }
                         ]
                         }
