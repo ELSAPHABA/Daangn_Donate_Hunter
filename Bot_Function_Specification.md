@@ -85,7 +85,7 @@
     - 1분마다 스크래핑 실행
     - 탐지 동네 및 키워드 조합으로 링크 쿼리 생성
     - Requests의 proxies 옵션 활용해 프록시 서버를 통한 요청으로 IP 차단 방지
-        - USER, PASS, HOST[0]~HOST[11], PORT는 .env 관리
+        - USER, PASS, HOST_1~HOST_12, PORT는 .env 관리
             - Github Actions에서 .env 파일을 secrets로 관리
         - HOST는 15분마다 교체
     - User-Agent Mixer
@@ -106,7 +106,7 @@
     - 1달에 1번 또는 유저 요청시 실행
     - 마지막 번호 이후부터 탐색
     - Requests의 proxies 옵션 활용해 프록시 서버를 통한 요청으로 IP 차단 방지
-        - USER, PASS, HOST[0]~HOST[11], PORT는 .env 관리
+        - USER, PASS, HOST_1~HOST_12, PORT는 .env 관리
             - Github Actions에서 .env 파일을 secrets로 관리
         - HOST는 15분마다 교체
     - User-Agent Mixer
@@ -182,7 +182,7 @@
 - **자동 배포**: main 브랜치에 푸시될 때마다 자동으로 배포되도록 설정
     - on: push: branches: [main]
 - **환경 변수 관리**: .env 파일을 secrets로 관리하여 Github Actions 과정에서 생성할 수 있도록 설정
-    - secrets.RPI3_SERVER_HOST, secrets.RPI3_SERVER_USER, secrets.RPI3_SERVER_KEY, secrets.PROXY_USER, secrets.PROXY_PASS, secrets.PROXY_HOST[0]~secrets.PROXY_HOST[11], secrets.PROXY_PORT
+    - secrets.RPI3_SERVER_HOST, secrets.RPI3_SERVER_USER, secrets.RPI3_SERVER_KEY, secrets.PROXY_USER, secrets.PROXY_PASS, secrets.PROXY_HOST_1~secrets.PROXY_HOST_12, secrets.PROXY_PORT
 - **테스트 스크립트**: 배포 전에 간단한 테스트 스크립트를 실행하여 주요 기능이 정상적으로 작동하는지 확인
 - **배포 스크립트**: 배포 스크립트를 작성하여 자동으로 서버에 코드를 배포하고 필요한 서비스를 재시작하도록 설정
     - git pull & systemctl restart 방식
