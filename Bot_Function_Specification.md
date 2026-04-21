@@ -117,18 +117,47 @@
     - 스크래핑에 실패했을 경우 오류 로그 기록
     
 ### 3.3 텔레그램 봇 구현
--  멀티 유저 서비스를 위한 chat_id, detect_link JSON 저장
-    - chat_id:
+-  멀티 유저 서비스를 위한 JSON 저장
+    - chat_id
     - detect_link
         - 당근 기본 링크 + 동네 (&in=<번호>) + 키워드 (&search=<키워드>)
         - 0개~n개
+        - 유저별로 탐지 설정에 따라 동네 및 키워드 조합으로 생성된 링크 저장
+    - json 구조 예시:{
+                    "users": [
+                        {
+                        "chat_id": "123456789",
+                        "notification": true,
+                        "subscriptions": [
+                            {
+                            "region": {
+                                "full_name": "서울특별시 강남구 역삼동",
+                                "dong_name": "역삼동",
+                                "code": "12345"
+                            },
+                            "keyword": "아이폰",
+                            "detect_link": "https://www.daangn.com/search?in=12345&search=아이폰"
+                            },
+                            {
+                            "region": {
+                                "full_name": "서울특별시 서초구 서초동",
+                                "dong_name": "서초동",
+                                "code": "67890"
+                            },
+                            "keyword": "맥북",
+                            "detect_link": "https://www.daangn.com/search?in=67890&search=맥북"
+                            }
+                        ]
+                        }
+                    ]
+                    } 
 -  유저별 탐지 설정 관리
     - 탐지 동네 설정
     - 탐지 키워드 설정
-    - 알림 설정
+    - 알림 설정 (켜기/끄기)
 - 텔레그램 메시지 포맷
     - 제목: [당근마켓 나눔 탐지 알림]
-    - 내용: [동네이름]에서 [키워드] 관련 나눔 상품이 올라왔습니다! 링크: [상품링크]
+    - 내용: [dong_name]에서 [keyword] 관련 나눔 상품이 올라왔습니다! 링크: [상품링크]
         - 상품 링크는 클릭시 앱으로 연결되도록 구현
         - 무조건 https://www.daangn.com 링크 기반으로 전송
 - 텔레그램 메시지 전송
