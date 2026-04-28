@@ -185,6 +185,7 @@
     - secrets.RPI3_SERVER_HOST, secrets.RPI3_SERVER_USER, secrets.RPI3_SERVER_KEY, secrets.PROXY_USER, secrets.PROXY_PASS, secrets.PROXY_HOST_1~secrets.PROXY_HOST_12, secrets.PROXY_PORT
 - **테스트 스크립트**: 배포 전에 간단한 테스트 스크립트를 실행하여 주요 기능이 정상적으로 작동하는지 확인
 - **배포 스크립트**: 배포 스크립트를 작성하여 자동으로 서버에 코드를 배포하고 필요한 서비스를 재시작하도록 설정
+    - appleboy/ssh-action@v1.2.5
     - git pull & systemctl restart 방식
         - .env 파일 생성 및 토큰 주입
         - pip install pyproject.toml
