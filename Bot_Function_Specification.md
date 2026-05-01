@@ -206,7 +206,8 @@
     - docker build & run 방식
         - restart unless-stopped
         - env-file
-        - volumes
+        - volume
+            - json
         - docker-entrypoint.sh
         - dockerignore
     - 양 방식 모두 작성 및 선택적으로 실행할 수 있도록 설정
