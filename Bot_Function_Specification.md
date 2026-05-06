@@ -100,6 +100,8 @@
     - 가장 최신 상품 링크 Selector: '#main-content > div._1j555bm0.sprinkles_paddingLeft_4_base__1byufe8g6.sprinkles_paddingLeft_10_small__1byufe8gr.sprinkles_paddingLeft_16_medium__1byufe8h4.sprinkles_paddingLeft_20_large__1byufe8h9.sprinkles_paddingRight_4_base__1byufe8e2.sprinkles_paddingRight_10_small__1byufe8en.sprinkles_paddingRight_16_medium__1byufe8f0.sprinkles_paddingRight_20_large__1byufe8f5.sprinkles_backgroundColor_layerDefault__1byufe8n.sprinkles_width_full_base__1byufe84q > div > section > div > div._12b29ll0.sprinkles_width_full_base__1byufe84q._12b29ll1 > a:nth-child(1)' 의 herf 링크값
     - 마지막 탐지 시점의 가장 최신 상품 링크와 비교
     - 링크값이 변경되었을 경우 새 상품으로 판단하여 텔레그램 봇으로 알림 전송
+    - 페이지 소스 로딩 후, 짧은 대기 후 스크래핑 실행하여, 페이지 로딩 지연으로 인한 탐지 실패 방지
+    - 최초 스크래핑 실패 시 10초 내 1회 재시도, 10초 초과시 TimeoutError로 간주하여 오류 로그 기록 및 다음 스크래핑 대상으로 넘어감
     - 스크래핑에 실패했을 경우 오류 로그 기록
 
 ### 3.2 동네 주소 수집 및 DB 저장
