@@ -129,7 +129,7 @@
         - HOST는 15분마다 교체
     - User-Agent Mixer
         - 추적 및 차단을 피하기 위해 User-Agent를 주기적으로 교체
-        - user-agents.py, user-agents.txt를 참고해 적절히 변형해 사용
+        - `user-agents.py`, `user-agents.txt`를 참고해 적절히 변형해 사용
     - 
     ```css
     #main-content > div._1j555bm0.sprinkles_paddingLeft_4_base__1byufe8g6.sprinkles_paddingLeft_10_small__1byufe8gr.sprinkles_paddingLeft_16_medium__1byufe8h4.sprinkles_paddingLeft_20_large__1byufe8h9.sprinkles_paddingRight_4_base__1byufe8e2.sprinkles_paddingRight_10_small__1byufe8en.sprinkles_paddingRight_16_medium__1byufe8f0.sprinkles_paddingRight_20_large__1byufe8f5.sprinkles_backgroundColor_layerDefault__1byufe8n.sprinkles_width_full_base__1byufe84q > div > div > h1 의 text값에서, "중고거래" 키워드 제외한 주소값만 저장
@@ -192,7 +192,7 @@
     - 메시지 전송 시점: 새 상품 탐지 시, 유저가 알림 설정을 켜놓은 경우
     - 메시지 전송 실패 시 오류 로그 기록
 - **텔레그램 봇 명령어 및 버튼 구현**
-    - /start, /settings, /help, /manage 명령어 구현
+    - `/start`, `/settings`, `/help`, `/manage` 명령어 구현
     - CustomKeyboard를 활용한 탐지 설정 관리 버튼 구현
 - **텔레그램 봇 UI/UX 설계에 따른 메시지 및 버튼 구현**
     - 각 명령어 및 버튼에 따른 메시지 및 기능 구현
