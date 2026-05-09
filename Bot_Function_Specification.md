@@ -97,7 +97,10 @@
     - User-Agent Mixer
         - 추적 및 차단을 피하기 위해 User-Agent를 주기적으로 교체
         - user-agents.py, user-agents.txt를 참고해 적절히 변형해 사용
-    - 가장 최신 상품 링크 Selector: '#main-content > div._1j555bm0.sprinkles_paddingLeft_4_base__1byufe8g6.sprinkles_paddingLeft_10_small__1byufe8gr.sprinkles_paddingLeft_16_medium__1byufe8h4.sprinkles_paddingLeft_20_large__1byufe8h9.sprinkles_paddingRight_4_base__1byufe8e2.sprinkles_paddingRight_10_small__1byufe8en.sprinkles_paddingRight_16_medium__1byufe8f0.sprinkles_paddingRight_20_large__1byufe8f5.sprinkles_backgroundColor_layerDefault__1byufe8n.sprinkles_width_full_base__1byufe84q > div > section > div > div._12b29ll0.sprinkles_width_full_base__1byufe84q._12b29ll1 > a:nth-child(1)' 의 herf 링크값
+    - 가장 최신 상품 링크 Selector: 
+    ```css
+    '#main-content > div._1j555bm0.sprinkles_paddingLeft_4_base__1byufe8g6.sprinkles_paddingLeft_10_small__1byufe8gr.sprinkles_paddingLeft_16_medium__1byufe8h4.sprinkles_paddingLeft_20_large__1byufe8h9.sprinkles_paddingRight_4_base__1byufe8e2.sprinkles_paddingRight_10_small__1byufe8en.sprinkles_paddingRight_16_medium__1byufe8f0.sprinkles_paddingRight_20_large__1byufe8f5.sprinkles_backgroundColor_layerDefault__1byufe8n.sprinkles_width_full_base__1byufe84q > div > section > div > div._12b29ll0.sprinkles_width_full_base__1byufe84q._12b29ll1 > a:nth-child(1)' 의 herf 링크값
+    ```
     - 마지막 탐지 시점의 가장 최신 상품 링크와 비교
     - 링크값이 변경되었을 경우 새 상품으로 판단하여 텔레그램 봇으로 알림 전송
     - 페이지 소스 로딩 후, 짧은 대기 후 스크래핑 실행하여, 페이지 로딩 지연으로 인한 탐지 실패 방지
@@ -108,10 +111,13 @@
 - **동네 주소 DB**:
     - XX도 XX시 (XX구) XX동 : <숫자>
     - dict + JSON
-        - JSON 구조 예시: {
-                    "서울특별시 강남구 역삼동": "12345",
-                    "서울특별시 서초구 서초동": "67890"
-                    }
+        - JSON 구조 예시: 
+        ```json
+        {
+            "서울특별시 강남구 역삼동": "12345",
+            "서울특별시 서초구 서초동": "67890"
+        }
+        ```
 
 - **동네 주소 스크래핑 수집**:
     - https://www.daangn.com/kr/buy-sell/s/?in=<번호>
@@ -129,41 +135,44 @@
     - 스크래핑에 실패했을 경우 오류 로그 기록
     
 ### 3.3 텔레그램 봇 구현
--  멀티 유저 서비스를 위한 JSON 저장
+- **멀티 유저 서비스를 위한 JSON 저장**
     - chat_id
     - detect_link
         - 당근 기본 링크 + 동네 (&in=<번호>) + 키워드 (&search=<키워드>)
         - 0개~n개
         - 유저별로 탐지 설정에 따라 동네 및 키워드 조합으로 생성된 링크 저장
-    - json 구조 예시:{
-                    "users": [
-                        {
-                        "chat_id": "123456789",
-                        "notification": true,
-                        "subscriptions": [
-                            {
-                            "region": {
-                                "full_name": "서울특별시 강남구 역삼동",
-                                "dong_name": "역삼동",
-                                "code": "12345"
-                            },
-                            "keyword": "아이폰",
-                            "detect_link": "https://www.daangn.com/search?in=12345&search=아이폰"
-                            },
-                            {
-                            "region": {
-                                "full_name": "서울특별시 서초구 서초동",
-                                "dong_name": "서초동",
-                                "code": "67890"
-                            },
-                            "keyword": "맥북 중고",
-                            "detect_link": "https://www.daangn.com/search?in=67890&search=맥북+중고"
-                            }
-                        ]
-                        }
-                    ]
-                    } 
--  유저별 탐지 설정 관리
+    - json 구조 예시:
+    ```json
+    {
+        "users": [
+            {
+            "chat_id": "123456789",
+            "notification": true,
+            "subscriptions": [
+                {
+                "region": {
+                    "full_name": "서울특별시 강남구 역삼동",
+                    "dong_name": "역삼동",
+                    "code": "12345"
+                },
+                "keyword": "아이폰",
+                "detect_link": "https://www.daangn.com/search?in=12345&search=아이폰"
+                },
+                {
+                "region": {
+                    "full_name": "서울특별시 서초구 서초동",
+                    "dong_name": "서초동",
+                    "code": "67890"
+                },
+                "keyword": "맥북 중고",
+                "detect_link": "https://www.daangn.com/search?in=67890&search=맥북+중고"
+                }
+            ]
+            }
+        ]
+        }
+    ``` 
+- **유저별 탐지 설정 관리
     - 탐지 동네 설정
     - 탐지 키워드 설정
         - 키워드 미입력 시 전체 탐지로 간주
@@ -171,20 +180,20 @@
                 - 전체 탐지 취소시 기존 키워드 설정으로 탐지 재개
             - 전체 탐지 설정은 특별 키워드 (예: "전체")로 관리하여, 탐지 시 전체 탐지로 간주하여 처리
     - 알림 설정 (켜기/끄기)
-- 텔레그램 메시지 포맷
+- **텔레그램 메시지 포맷**
     - 제목: [당근마켓 나눔 탐지 알림]
     - 내용: [dong_name]에서 [keyword] 관련 나눔 상품이 올라왔습니다! 링크: [상품링크]
         - 상품 링크는 클릭시 앱으로 연결되도록 구현
         - 무조건 https://www.daangn.com 링크 기반으로 전송
-- 텔레그램 메시지 전송
+- **텔레그램 메시지 전송**
     - 메시지 전송 시점: 새 상품 탐지 시, 유저가 알림 설정을 켜놓은 경우
     - 메시지 전송 실패 시 오류 로그 기록
-- 텔레그램 봇 명령어 및 버튼 구현
+- **텔레그램 봇 명령어 및 버튼 구현**
     - /start, /settings, /help, /manage 명령어 구현
     - CustomKeyboard를 활용한 탐지 설정 관리 버튼 구현
-- 텔레그램 봇 UI/UX 설계에 따른 메시지 및 버튼 구현
+- **텔레그램 봇 UI/UX 설계에 따른 메시지 및 버튼 구현**
     - 각 명령어 및 버튼에 따른 메시지 및 기능 구현
-- 텔레그램 봇과 스크래핑 기능 연동
+- **텔레그램 봇과 스크래핑 기능 연동**
     - 스크래핑에서 탐지된 새 상품 정보를 텔레그램 봇으로 전달하여 알림 전송
 
 ### 3.4 오류 로그 기록
