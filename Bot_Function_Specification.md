@@ -109,7 +109,7 @@
 
 ### 3.2 동네 주소 수집 및 DB 저장
 - **동네 주소 DB**:
-    - XX도 XX시 (XX구) XX동 : <숫자>
+    - `XX도 XX시 (XX구) XX동 : <숫자>` 형태로 동네 주소와 번호를 매핑하여 저장
     - dict + JSON
         - JSON 구조 예시: 
         ```json
@@ -130,7 +130,10 @@
     - User-Agent Mixer
         - 추적 및 차단을 피하기 위해 User-Agent를 주기적으로 교체
         - user-agents.py, user-agents.txt를 참고해 적절히 변형해 사용
-    - '#main-content > div._1j555bm0.sprinkles_paddingLeft_4_base__1byufe8g6.sprinkles_paddingLeft_10_small__1byufe8gr.sprinkles_paddingLeft_16_medium__1byufe8h4.sprinkles_paddingLeft_20_large__1byufe8h9.sprinkles_paddingRight_4_base__1byufe8e2.sprinkles_paddingRight_10_small__1byufe8en.sprinkles_paddingRight_16_medium__1byufe8f0.sprinkles_paddingRight_20_large__1byufe8f5.sprinkles_backgroundColor_layerDefault__1byufe8n.sprinkles_width_full_base__1byufe84q > div > div > h1' 의 text값에서, "중고거래" 키워드 제외한 주소값만 저장
+    - 
+    ```css
+    #main-content > div._1j555bm0.sprinkles_paddingLeft_4_base__1byufe8g6.sprinkles_paddingLeft_10_small__1byufe8gr.sprinkles_paddingLeft_16_medium__1byufe8h4.sprinkles_paddingLeft_20_large__1byufe8h9.sprinkles_paddingRight_4_base__1byufe8e2.sprinkles_paddingRight_10_small__1byufe8en.sprinkles_paddingRight_16_medium__1byufe8f0.sprinkles_paddingRight_20_large__1byufe8f5.sprinkles_backgroundColor_layerDefault__1byufe8n.sprinkles_width_full_base__1byufe84q > div > div > h1 의 text값에서, "중고거래" 키워드 제외한 주소값만 저장
+    ```
     - 같은 주소가 여러 번호로 중복 수집될 경우 마지막 수집된 번호로 저장
     - 스크래핑에 실패했을 경우 오류 로그 기록
     
