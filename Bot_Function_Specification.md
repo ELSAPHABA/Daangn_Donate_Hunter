@@ -290,16 +290,9 @@
 
 ## 7. AI 개발 지침
 
-- **크로스 코드 리뷰 및 개선**: AI 코드 작성 후, 타 AI 호출하여 코드 리뷰 및 개선 제안 받고, 제안된 개선 사항을 반영하여 코드 개선
-  - Gemini CLI, Codex CLI, Copilot CLI
-    - SKILL.md
-      - Gemini CLI: gemini-reviewer.md
-      - Codex CLI:
-        - codex-reviewer.md
-        - codex /review
-        - codex /improve
-      - Copilot CLI: copilot-reviewer.md
-      - 상세 명령어는 codex-oneshot-command.md, gemini-oneshot-command.md 참고
+- **agent-browser 활용**: skills: agent-browser를 활용하여, 당근마켓 웹 페이지의 구조 및 동작 방식을 분석하고, 스크래핑에 필요한 요소들을 식별하여 코드 작성
+
+- **크로스 코드 리뷰 및 개선**: AI 코드 작성 후, skills: cross-verify 사용하여 코드 리뷰 및 개선 제안 받고, 제안된 개선 사항을 반영하여 코드 개선
 
 - **수정 히스토리 문서화**: AI 코드 작성 및 수정 시, 수정 히스토리 및 변경 사항을 상세히 문서화하여 추후 유지보수 및 협업에 용이하도록 함
   - 변경 사항: 언제, 어떤 부분이 어떻게 변경되었는지, 왜 변경되었는지에 대한 설명 포함
