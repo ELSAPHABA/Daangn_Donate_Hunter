@@ -271,7 +271,7 @@
             - chat_id.json
         - dockerignore
     - 양 방식 모두 작성 및 선택적으로 실행할 수 있도록 설정
-    - docker 방식은 주석 처리
+    - git pull & systemctl restart 방식은 주석 처리
 
 ## 5. 보안 고려사항
 
