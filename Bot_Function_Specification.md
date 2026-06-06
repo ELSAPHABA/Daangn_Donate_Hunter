@@ -99,6 +99,7 @@
     - 멀티 키워드는 +로 연결하여 쿼리 생성
     - 전체 탐지 경우 `&search=` 생략
   - Requests의 proxies 옵션 활용해 프록시 서버를 통한 요청으로 IP 차단 방지
+    - Type: SOCKS5
     - USER, PASS, HOST_1~HOST_12, PORT는 .env 관리
       - Github Actions에서 .env 파일을 secrets로 관리
     - HOST는 15분마다 교체
@@ -138,6 +139,7 @@
   - 마지막 번호 이후부터 탐색
     - `{last_area_number=<번호>}`
   - Requests의 proxies 옵션 활용해 프록시 서버를 통한 요청으로 IP 차단 방지
+    - Type: SOCKS5
     - USER, PASS, HOST_1~HOST_12, PORT는 .env 관리
       - Github Actions에서 .env 파일을 secrets로 관리
     - HOST는 15분마다 교체
