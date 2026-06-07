@@ -98,6 +98,7 @@
   - 탐지 동네 및 키워드 조합으로 링크 쿼리 생성
     - 멀티 키워드는 +로 연결하여 쿼리 생성
     - 전체 탐지 경우 `&search=` 생략
+  - 인코딩: UTF-8
   - Requests의 proxies 옵션 활용해 프록시 서버를 통한 요청으로 IP 차단 방지
     - Type: SOCKS5
     - USER, PASS, HOST_1~HOST_12, PORT는 .env 관리
@@ -140,6 +141,7 @@
   - 마지막 번호 이후부터 탐색
     - `{last_area_number=<번호>}`
   - 탐색속도: 10초당 1회
+  - 인코딩: UTF-8
   - Requests의 proxies 옵션 활용해 프록시 서버를 통한 요청으로 IP 차단 방지
     - Type: SOCKS5
     - USER, PASS, HOST_1~HOST_12, PORT는 .env 관리
@@ -267,9 +269,10 @@
         - restart unless-stopped
         - env-file
         - volume
+        - Dockerfile
         - docker-entrypoint.sh
             - chat_id.json
-        - dockerignore
+        - .dockerignore
     - 양 방식 모두 작성 및 선택적으로 실행할 수 있도록 설정
     - git pull & systemctl restart 방식은 주석 처리
 
@@ -284,6 +287,9 @@
 ## 6. 유지보수 및 확장성 고려사항
 
 - **코드 구조화**: 기능별로 모듈화하여 코드의 가독성과 유지보수성을 높임
+- **코드 패키지화**: 기능별로 패키지화 (폴더화) 하여, 향후 기능 추가 및 수정 시 코드 관리 용이하도록 설계
+- **코드 주석**: 주요 기능 및 복잡한 로직에 대한 주석을 추가하여, 향후 유지보수 시 이해를 돕도록 함
+- **pyproject.toml 작성**: 프로젝트 의존성 및 패키지 관리를 위해 pyproject.toml 파일 작성
 - **유저 데이터 관리**: 유저 데이터를 JSON 파일로 관리하되, 향후 데이터베이스로 확장할 수 있도록 설계
 - **에러 핸들링**: 예외 처리를 통해 예상치 못한 오류 발생 시에도 시스템이 안정적으로 동작하도록 구현
 - **확장성**: 향후 기능 추가 (예: 특정 카테고리 탐지, 멀티 플랫폼 지원 등)를 고려하여 코드 구조를 유연하게 설계
