@@ -1,0 +1,117 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      - name: Smoke test
+        run: python -m compileall main.py bot core monitoring notifications resources scraping storage utils
+      - name: Write env file
+        run: |
+          {
+            echo "PROXY_USER=${{ secrets.PROXY_USER }}"
+            echo "PROXY_PASS=${{ secrets.PROXY_PASS }}"
+            echo "PROXY_PORT=${{ secrets.PROXY_PORT }}"
+            echo "TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}"
+            echo "ADMIN_CHAT_IDS=${{ secrets.ADMIN_CHAT_IDS }}"
+            for i in $(seq 1 12); do
+              value_var="PROXY_HOST_${i}"
+              echo "${value_var}=${!value_var}"
+            done
+          } > .env
+        env:
+          PROXY_HOST_1: ${{ secrets.PROXY_HOST_1 }}
+          PROXY_HOST_2: ${{ secrets.PROXY_HOST_2 }}
+          PROXY_HOST_3: ${{ secrets.PROXY_HOST_3 }}
+          PROXY_HOST_4: ${{ secrets.PROXY_HOST_4 }}
+          PROXY_HOST_5: ${{ secrets.PROXY_HOST_5 }}
+          PROXY_HOST_6: ${{ secrets.PROXY_HOST_6 }}
+          PROXY_HOST_7: ${{ secrets.PROXY_HOST_7 }}
+          PROXY_HOST_8: ${{ secrets.PROXY_HOST_8 }}
+          PROXY_HOST_9: ${{ secrets.PROXY_HOST_9 }}
+          PROXY_HOST_10: ${{ secrets.PROXY_HOST_10 }}
+          PROXY_HOST_11: ${{ secrets.PROXY_HOST_11 }}
+          PROXY_HOST_12: ${{ secrets.PROXY_HOST_12 }}
+      - name: Deploy to Raspberry Pi 3
+        if: ${{ secrets.RPI3_SERVER_HOST != '' }}
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.RPI3_SERVER_HOST }}
+          username: ${{ secrets.RPI3_SERVER_USER }}
+          key: ${{ secrets.RPI3_SERVER_KEY }}
+          script: |
+            set -eu
+
+            # Docker 사용 가능 여부 확인
+            docker --version
+
+            # 작업 디렉토리로 이동
+            cd /home/elsaphaba/HongDev/NewPost_Telegram_Notification_Bot
+
+            # 최신 코드 가져오기
+            git pull origin main
+
+            # .env 파일 생성 (토큰 주입)
+            cat > .env <<'EOF'
+            PROXY_USER=${{ secrets.PROXY_USER }}
+            PROXY_PASS=${{ secrets.PROXY_PASS }}
+            PROXY_PORT=${{ secrets.PROXY_PORT }}
+            PROXY_HOST_1=${{ secrets.PROXY_HOST_1 }}
+            PROXY_HOST_2=${{ secrets.PROXY_HOST_2 }}
+            PROXY_HOST_3=${{ secrets.PROXY_HOST_3 }}
+            PROXY_HOST_4=${{ secrets.PROXY_HOST_4 }}
+            PROXY_HOST_5=${{ secrets.PROXY_HOST_5 }}
+            PROXY_HOST_6=${{ secrets.PROXY_HOST_6 }}
+            PROXY_HOST_7=${{ secrets.PROXY_HOST_7 }}
+            PROXY_HOST_8=${{ secrets.PROXY_HOST_8 }}
+            PROXY_HOST_9=${{ secrets.PROXY_HOST_9 }}
+            PROXY_HOST_10=${{ secrets.PROXY_HOST_10 }}
+            PROXY_HOST_11=${{ secrets.PROXY_HOST_11 }}
+            PROXY_HOST_12=${{ secrets.PROXY_HOST_12 }}
+            TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
+            ADMIN_CHAT_IDS=${{ secrets.ADMIN_CHAT_IDS }}
+            EOF
+            chmod 600 .env
+
+            # =========================
+            # 파일 직접 실행
+            # =========================
+
+            # 가상환경 패키지 설치 (pyproject.toml)
+            # source /home/elsaphaba/HongDev/HongDevVenv/bin/activate
+            # pip install -e .
+
+            # 서비스 재시작
+            # sudo systemctl restart Daangn_Donate_Hunter
+
+
+            # =========================
+            # Docker 배포
+            # =========================
+
+            # Docker 이미지 빌드
+            docker build -t daangn-donate-hunter:latest .
+
+            # 기존 컨테이너 제거 (존재하는 경우)
+            docker rm -f daangn-donate-hunter || true
+
+            # 컨테이너 생성 및 실행
+            docker run -d \
+              --name daangn-donate-hunter \
+              --restart unless-stopped \
+              --env-file .env \
+              -v daangn-donate-hunter-data:/data \
+              --entrypoint ./docker-entrypoint.sh \
+              daangn-donate-hunter:latest bot
