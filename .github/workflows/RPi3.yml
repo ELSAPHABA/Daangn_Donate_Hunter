@@ -44,8 +44,8 @@ jobs:
           PROXY_HOST_10: ${{ secrets.PROXY_HOST_10 }}
           PROXY_HOST_11: ${{ secrets.PROXY_HOST_11 }}
           PROXY_HOST_12: ${{ secrets.PROXY_HOST_12 }}
+
       - name: Deploy to Raspberry Pi 3
-        if: ${{ secrets.RPI3_SERVER_HOST != '' }}
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.RPI3_SERVER_HOST }}
