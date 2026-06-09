@@ -55,19 +55,15 @@ jobs:
             set -eu
 
             # Docker 사용 가능 여부 확인
-            echo "[deploy] docker version"
             docker --version
 
             # 작업 디렉토리로 이동
-            echo "[deploy] cd project"
             cd /home/elsaphaba/HongDev/Daangn_Donate_Hunter
 
             # 최신 코드 가져오기
-            echo "[deploy] git pull"
-            git pull --ff-only origin main
+            git pull origin main
 
             # .env 파일 생성 (토큰 주입)
-            echo "[deploy] write env"
             cat > .env <<'EOF'
             PROXY_USER=${{ secrets.PROXY_USER }}
             PROXY_PASS=${{ secrets.PROXY_PASS }}
@@ -106,34 +102,16 @@ jobs:
             # =========================
 
             # Docker 이미지 빌드
-            echo "[deploy] docker build start"
-            docker build --progress=plain -t daangn-donate-hunter:latest .
-            echo "[deploy] docker build done"
+            docker build -t daangn-donate-hunter:latest .
 
             # 기존 컨테이너 제거 (존재하는 경우)
-            echo "[deploy] remove old container"
-            OLD_CONTAINER_ID="$(docker ps -aq --filter 'name=^/daangn-donate-hunter$' | head -n 1)"
-            if [ -n "$OLD_CONTAINER_ID" ]; then
-              echo "[deploy] removing container id=$OLD_CONTAINER_ID"
-              docker rm -f "$OLD_CONTAINER_ID"
-            else
-              echo "[deploy] old container not found"
-            fi
-            if docker ps -aq --filter 'name=^/daangn-donate-hunter$' | grep -q .; then
-              echo "[deploy] failed to remove old container"
-              docker ps -a --filter name=daangn-donate-hunter
-              exit 1
-            fi
-            echo "[deploy] old container removed"
+            docker rm -f daangn-donate-hunter || true
 
             # 컨테이너 생성 및 실행
-            echo "[deploy] docker run start"
             docker run -d \
               --name daangn-donate-hunter \
               --restart unless-stopped \
               --env-file .env \
               -v daangn-donate-hunter-data:/data \
+              --entrypoint ./docker-entrypoint.sh \
               daangn-donate-hunter:latest bot
-            echo "[deploy] docker run done"
-            docker ps --filter name=daangn-donate-hunter
-            docker logs --tail 80 daangn-donate-hunter || true
