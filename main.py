@@ -32,8 +32,13 @@ def build_components():
 
 
 async def run_area_scrape_sample(start: int | None, count: int, delay: int) -> None:
-    _settings, _activity_logger, _error_logger, store, scraper = build_components()
-    start_number = start if start is not None else store.get_last_area_number() + 1
+    settings, _activity_logger, _error_logger, store, scraper = build_components()
+    last_area_number = store.get_last_area_number()
+    start_number = start if start is not None else (
+        last_area_number + 1
+        if last_area_number > 0
+        else settings.area_collection_start_number
+    )
     result = scraper.scrape_area_codes(start_number=start_number, max_count=count, delay_seconds=delay)
     store.upsert_areas(result.areas, result.last_area_number)
     print(f"수집 동네 {len(result.areas)}개, last_area_number={result.last_area_number}")
@@ -55,6 +60,7 @@ def run_bot() -> None:
         scraper=scraper,
         activity_logger=activity_logger,
         error_logger=error_logger,
+        initial_start_number=settings.area_collection_start_number,
         delay_seconds=settings.area_collection_delay_seconds,
     )
 
@@ -90,7 +96,12 @@ def main() -> None:
     subparsers = parser.add_subparsers(dest="command")
     subparsers.add_parser("bot", help="텔레그램 봇을 실행합니다.")
     area_parser = subparsers.add_parser("scrape-areas-sample", help="동네 번호 DB를 소량 샘플 수집합니다.")
-    area_parser.add_argument("--start", type=int, default=None, help="시작 동네 번호. 생략 시 마지막 번호 다음부터 시작합니다.")
+    area_parser.add_argument(
+        "--start",
+        type=int,
+        default=None,
+        help="시작 동네 번호. 생략 시 마지막 번호 다음부터, 최초 실행이면 AREA_COLLECTION_START_NUMBER부터 시작합니다.",
+    )
     area_parser.add_argument("--count", type=int, default=5, help="수집 시도 개수. 안전상 최대 20개입니다.")
     area_parser.add_argument("--delay", type=int, default=10, help="요청 간 대기 초.")
     args = parser.parse_args()

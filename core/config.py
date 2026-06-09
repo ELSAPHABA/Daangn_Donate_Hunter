@@ -23,6 +23,7 @@ class Settings:
     admin_chat_ids: set[str]
     scrape_interval_seconds: int = 60
     scrape_timeout_seconds: int = 10
+    area_collection_start_number: int = 11
     area_collection_delay_seconds: int = 10
     proxy_rotate_seconds: int = 15 * 60
     user_agent_file: str = "user-agents.txt"
@@ -49,6 +50,7 @@ def load_settings() -> Settings:
         },
         scrape_interval_seconds=int(os.getenv("SCRAPE_INTERVAL_SECONDS", "60")),
         scrape_timeout_seconds=int(os.getenv("SCRAPE_TIMEOUT_SECONDS", "10")),
+        area_collection_start_number=int(os.getenv("AREA_COLLECTION_START_NUMBER", "11")),
         area_collection_delay_seconds=int(os.getenv("AREA_COLLECTION_DELAY_SECONDS", "10")),
         proxy_rotate_seconds=int(os.getenv("PROXY_ROTATE_SECONDS", str(15 * 60))),
         user_agent_file=str(user_agent_file),

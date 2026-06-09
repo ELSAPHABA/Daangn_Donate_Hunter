@@ -14,12 +14,14 @@ class AreaDatabaseCollector:
         scraper: DaangnScraper,
         activity_logger: logging.Logger,
         error_logger: logging.Logger,
+        initial_start_number: int = 11,
         delay_seconds: int = 10,
     ) -> None:
         self.store = store
         self.scraper = scraper
         self.activity_logger = activity_logger
         self.error_logger = error_logger
+        self.initial_start_number = max(1, initial_start_number)
         self.delay_seconds = delay_seconds
         self._lock = asyncio.Lock()
 
@@ -29,11 +31,16 @@ class AreaDatabaseCollector:
             return
         async with self._lock:
             last_area_number = self.store.get_last_area_number()
-            start_number = max(1, last_area_number + 1)
+            start_number = (
+                last_area_number + 1
+                if last_area_number > 0
+                else self.initial_start_number
+            )
             self.activity_logger.info(
-                "[동네DB 수집 준비] last_area_number=%s start_number=%s",
+                "[동네DB 수집 준비] last_area_number=%s start_number=%s initial_start_number=%s",
                 last_area_number,
                 start_number,
+                self.initial_start_number,
             )
             await self._collect_until_mismatch(start_number)
 
