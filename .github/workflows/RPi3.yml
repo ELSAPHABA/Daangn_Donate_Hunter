@@ -55,15 +55,19 @@ jobs:
             set -eu
 
             # Docker 사용 가능 여부 확인
+            echo "[deploy] docker version"
             docker --version
 
             # 작업 디렉토리로 이동
+            echo "[deploy] cd project"
             cd /home/elsaphaba/HongDev/Daangn_Donate_Hunter
 
             # 최신 코드 가져오기
-            git pull origin main
+            echo "[deploy] git pull"
+            git pull --ff-only origin main
 
             # .env 파일 생성 (토큰 주입)
+            echo "[deploy] write env"
             cat > .env <<'EOF'
             PROXY_USER=${{ secrets.PROXY_USER }}
             PROXY_PASS=${{ secrets.PROXY_PASS }}
@@ -102,16 +106,23 @@ jobs:
             # =========================
 
             # Docker 이미지 빌드
-            docker build -t daangn-donate-hunter:latest .
+            echo "[deploy] docker build start"
+            docker build --progress=plain -t daangn-donate-hunter:latest .
+            echo "[deploy] docker build done"
 
             # 기존 컨테이너 제거 (존재하는 경우)
-            docker rm -f daangn-donate-hunter || true
+            echo "[deploy] remove old container"
+            timeout 60s docker rm -f daangn-donate-hunter || true
+            echo "[deploy] old container removed or not found"
 
             # 컨테이너 생성 및 실행
+            echo "[deploy] docker run start"
             docker run -d \
               --name daangn-donate-hunter \
               --restart unless-stopped \
               --env-file .env \
               -v daangn-donate-hunter-data:/data \
-              --entrypoint ./docker-entrypoint.sh \
               daangn-donate-hunter:latest bot
+            echo "[deploy] docker run done"
+            docker ps --filter name=daangn-donate-hunter
+            docker logs --tail 80 daangn-donate-hunter || true
