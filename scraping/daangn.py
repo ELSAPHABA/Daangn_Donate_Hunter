@@ -38,6 +38,18 @@ class AreaNumberMismatch(Exception):
     pass
 
 
+class NoCookieSession(requests.Session):
+    def prepare_request(self, request: requests.Request) -> requests.PreparedRequest:
+        request.cookies = {}
+        prepared = super().prepare_request(request)
+        prepared.headers.pop("Cookie", None)
+        return prepared
+
+    def send(self, request: requests.PreparedRequest, **kwargs) -> requests.Response:
+        request.headers.pop("Cookie", None)
+        return super().send(request, **kwargs)
+
+
 class DaangnScraper:
     def __init__(
         self,
@@ -50,7 +62,6 @@ class DaangnScraper:
         self.proxy_rotator = proxy_rotator
         self.error_logger = error_logger
         self.timeout_seconds = timeout_seconds
-        self.session = requests.Session()
 
     def fetch_latest_item(self, detect_link: str) -> ScrapedItem | None:
         html = self._get_html(detect_link)
@@ -93,13 +104,14 @@ class DaangnScraper:
         for attempt in range(2):
             try:
                 timeout = max(1, min(10, int(deadline - time.monotonic())))
-                response = self.session.get(
-                    url,
-                    headers={"User-Agent": self.user_agent_manager.get_user_agent()},
-                    proxies=self.proxy_rotator.requests_proxy() if self.proxy_rotator else None,
-                    timeout=timeout,
-                    allow_redirects=True,
-                )
+                with NoCookieSession() as session:
+                    response = session.get(
+                        url,
+                        headers={"User-Agent": self.user_agent_manager.get_user_agent()},
+                        proxies=self.proxy_rotator.requests_proxy() if self.proxy_rotator else None,
+                        timeout=timeout,
+                        allow_redirects=True,
+                    )
                 response.raise_for_status()
                 return response
             except requests.RequestException as exc:
