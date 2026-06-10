@@ -4,7 +4,6 @@ import logging
 import re
 import time
 from collections.abc import Iterator
-from dataclasses import dataclass
 from urllib.parse import parse_qs, urlparse
 
 import requests
@@ -33,12 +32,6 @@ AREA_TITLE_SELECTOR = (
     "sprinkles_paddingRight_20_large__1byufe8f5.sprinkles_backgroundColor_layerDefault__1byufe8n."
     "sprinkles_width_full_base__1byufe84q > div > div > h1"
 )
-
-
-@dataclass(frozen=True)
-class AreaScrapeResult:
-    areas: dict[str, str]
-    last_area_number: int
 
 
 class AreaNumberMismatch(Exception):
@@ -71,32 +64,6 @@ class DaangnScraper:
             return None
         title = " ".join(link.get_text(" ", strip=True).split()) or "나눔 상품"
         return ScrapedItem(title=title, url=url)
-
-    def scrape_area_codes(
-        self,
-        start_number: int,
-        max_count: int = 5,
-        delay_seconds: int = 10,
-    ) -> AreaScrapeResult:
-        if max_count > 20:
-            raise ValueError("안전을 위해 한 번에 수집할 동네 번호는 20개 이하로 제한합니다.")
-        areas: dict[str, str] = {}
-        last_seen = start_number - 1
-        for number in range(start_number, start_number + max_count):
-            try:
-                area_name = self.fetch_area_name(number)
-                if area_name is None:
-                    continue
-                last_seen = number
-                if area_name:
-                    areas[area_name] = str(number)
-            except AreaNumberMismatch:
-                break
-            except Exception as exc:
-                self.error_logger.error("[동네 주소 스크래핑 실패] number=%s error=%s", number, exc)
-            if number != start_number + max_count - 1:
-                time.sleep(delay_seconds)
-        return AreaScrapeResult(areas=areas, last_area_number=last_seen)
 
     def fetch_area_name(self, number: int) -> str | None:
         url = f"{BASE_SEARCH_URL}?in={number}"

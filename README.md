@@ -32,14 +32,6 @@ daangn-donate-hunter bot
 Docker 배포에서는 `daangn-donate-hunter-data:/data` 볼륨을 사용하므로 컨테이너가 재생성되어도 `last_area_number`가 유지됩니다.
 당근 `?in=1`은 현재 최종 URL이 `...-11` 형태로 정규화되므로, 요청 번호와 응답 URL 번호 불일치 중단 조건을 유지하려면 최초 시작 번호를 `11`로 두는 것이 안전합니다.
 
-## 동네 번호 샘플 수집
-
-전체 DB를 한 번에 훑지 않도록 샘플 수집 명령은 기본 5개, 최대 20개만 시도합니다.
-
-```powershell
-python main.py scrape-areas-sample --start 295 --count 5 --delay 10
-```
-
 런타임 데이터는 `data/`, 사용자 활동 로그는 `user_activity.log`, 오류 로그는 `error.log`에 저장됩니다.
 
 ## 코드 구조
