@@ -23,7 +23,7 @@ class Settings:
     admin_chat_ids: set[str]
     scrape_interval_seconds: int = 60
     scrape_timeout_seconds: int = 10
-    area_collection_start_number: int = 11
+    area_collection_start_number: int = 1
     area_collection_delay_seconds: int = 10
     proxy_rotate_seconds: int = 15 * 60
     user_agent_file: str = "user-agents.txt"
