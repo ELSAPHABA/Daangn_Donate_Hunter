@@ -30,6 +30,7 @@ COPY docker-entrypoint.sh ./docker-entrypoint.sh
 
 RUN python -m pip install --upgrade pip \
     && python -m pip install . \
+    && sed -i 's/\r$//' /app/docker-entrypoint.sh \
     && chmod +x /app/docker-entrypoint.sh
 
 VOLUME ["/data"]
