@@ -26,6 +26,7 @@ class Settings:
     scrape_timeout_seconds: int = 10
     area_collection_start_number: int = 1
     area_collection_delay_seconds: int = 10
+    area_collection_retry_delay_seconds: int = 60
     area_collection_mismatch_stop_threshold: int = 30
     proxy_rotate_seconds: int = 15 * 60
     user_agent_file: str = "user-agents.txt"
@@ -55,6 +56,7 @@ def load_settings() -> Settings:
         scrape_timeout_seconds=int(os.getenv("SCRAPE_TIMEOUT_SECONDS", "10")),
         area_collection_start_number=int(os.getenv("AREA_COLLECTION_START_NUMBER", "11")),
         area_collection_delay_seconds=int(os.getenv("AREA_COLLECTION_DELAY_SECONDS", "10")),
+        area_collection_retry_delay_seconds=int(os.getenv("AREA_COLLECTION_RETRY_DELAY_SECONDS", "60")),
         area_collection_mismatch_stop_threshold=int(
             os.getenv("AREA_COLLECTION_MISMATCH_STOP_THRESHOLD", "30")
         ),

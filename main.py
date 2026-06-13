@@ -44,6 +44,7 @@ def run_bot() -> None:
         error_logger=error_logger,
         initial_start_number=settings.area_collection_start_number,
         delay_seconds=settings.area_collection_delay_seconds,
+        retry_delay_seconds=settings.area_collection_retry_delay_seconds,
         mismatch_stop_threshold=settings.area_collection_mismatch_stop_threshold,
     )
 

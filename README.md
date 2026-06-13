@@ -26,6 +26,7 @@ daangn-donate-hunter bot
 - 최초 시작 번호 기본값: `11`
 - 컨테이너 재실행: `/data/scrape_state.json`에 저장된 마지막 수집/확인 번호 다음부터 재개
 - 수집 간격: 10초에 1개 (`AREA_COLLECTION_DELAY_SECONDS`로 조정 가능)
+- 실패 재시도: 스크래핑 실패 또는 동네 이름 미검출 시 실패한 번호에서 60초 후 재시도 (`AREA_COLLECTION_RETRY_DELAY_SECONDS`로 조정 가능)
 - 정기 실행: 매월 1일 00:00, `Asia/Seoul` 기준
 - 중단 조건: 요청한 번호와 응답 URL의 `in` 번호가 30회 연속 불일치하면 없는 번호 구간으로 보고 종료 (`AREA_COLLECTION_MISMATCH_STOP_THRESHOLD`로 조정 가능)
 

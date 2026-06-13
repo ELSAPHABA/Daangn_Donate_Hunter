@@ -16,6 +16,7 @@ class AreaDatabaseCollector:
         error_logger: logging.Logger,
         initial_start_number: int = 11,
         delay_seconds: int = 10,
+        retry_delay_seconds: int = 60,
         mismatch_stop_threshold: int = 30,
     ) -> None:
         self.store = store
@@ -24,6 +25,7 @@ class AreaDatabaseCollector:
         self.error_logger = error_logger
         self.initial_start_number = max(1, initial_start_number)
         self.delay_seconds = delay_seconds
+        self.retry_delay_seconds = max(1, retry_delay_seconds)
         self.mismatch_stop_threshold = max(1, mismatch_stop_threshold)
         self._lock = asyncio.Lock()
 
@@ -41,11 +43,12 @@ class AreaDatabaseCollector:
             self.activity_logger.info(
                 (
                     "[동네DB 수집 준비] last_area_number=%s start_number=%s "
-                    "initial_start_number=%s mismatch_stop_threshold=%s"
+                    "initial_start_number=%s retry_delay_seconds=%s mismatch_stop_threshold=%s"
                 ),
                 last_area_number,
                 start_number,
                 self.initial_start_number,
+                self.retry_delay_seconds,
                 self.mismatch_stop_threshold,
             )
             await self._collect_until_mismatch(start_number)
@@ -81,14 +84,24 @@ class AreaDatabaseCollector:
                     return
             except Exception as exc:
                 self.error_logger.error("[동네DB 수집 실패] number=%s error=%s", number, exc)
-                return
+                await self._sleep_before_retry(number)
+                continue
             else:
                 if not area_name:
                     self.error_logger.error("[동네DB 수집 실패] number=%s error=동네 이름을 찾지 못했습니다.", number)
-                    return
+                    await self._sleep_before_retry(number)
+                    continue
                 consecutive_mismatch_count = 0
                 self.store.upsert_areas({area_name: str(number)}, number)
                 collected_count += 1
                 self.activity_logger.info("[동네DB 수집] %s:%s", area_name, number)
             number += 1
             await asyncio.sleep(self.delay_seconds)
+
+    async def _sleep_before_retry(self, number: int) -> None:
+        self.activity_logger.info(
+            "[동네DB 수집 재시도 대기] number=%s retry_after_seconds=%s",
+            number,
+            self.retry_delay_seconds,
+        )
+        await asyncio.sleep(self.retry_delay_seconds)
