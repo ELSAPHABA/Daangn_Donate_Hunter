@@ -22,6 +22,7 @@ class Settings:
     error_log: Path
     admin_chat_ids: set[str]
     scrape_interval_seconds: int = 60
+    monitor_misfire_grace_seconds: int = 300
     scrape_timeout_seconds: int = 10
     area_collection_start_number: int = 1
     area_collection_delay_seconds: int = 10
@@ -50,6 +51,7 @@ def load_settings() -> Settings:
             if item.strip()
         },
         scrape_interval_seconds=int(os.getenv("SCRAPE_INTERVAL_SECONDS", "60")),
+        monitor_misfire_grace_seconds=int(os.getenv("MONITOR_MISFIRE_GRACE_SECONDS", "300")),
         scrape_timeout_seconds=int(os.getenv("SCRAPE_TIMEOUT_SECONDS", "10")),
         area_collection_start_number=int(os.getenv("AREA_COLLECTION_START_NUMBER", "11")),
         area_collection_delay_seconds=int(os.getenv("AREA_COLLECTION_DELAY_SECONDS", "10")),

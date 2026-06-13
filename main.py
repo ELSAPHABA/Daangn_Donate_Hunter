@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import asyncio
 from datetime import time
 from zoneinfo import ZoneInfo
 
@@ -36,12 +37,6 @@ def run_bot() -> None:
     if not settings.telegram_bot_token:
         raise RuntimeError("TELEGRAM_BOT_TOKEN 환경 변수를 설정해야 합니다.")
 
-    application = Application.builder().token(settings.telegram_bot_token).build()
-    bot = DaangnBot(store, activity_logger, error_logger, settings.error_log, settings.admin_chat_ids)
-    bot.register(application)
-
-    notifier = TelegramNotifier(application.bot, error_logger)
-    monitor = DonationMonitor(store, scraper, notifier, error_logger)
     area_collector = AreaDatabaseCollector(
         store=store,
         scraper=scraper,
@@ -51,6 +46,33 @@ def run_bot() -> None:
         delay_seconds=settings.area_collection_delay_seconds,
         mismatch_stop_threshold=settings.area_collection_mismatch_stop_threshold,
     )
+
+    async def start_area_collection(application: Application) -> None:
+        task = asyncio.create_task(
+            area_collector.collect_from_next_number(),
+            name="area-db-collector-on-start",
+        )
+        application.bot_data["area_collection_start_task"] = task
+        task.add_done_callback(log_area_collection_task_result)
+
+    def log_area_collection_task_result(task: asyncio.Task) -> None:
+        if task.cancelled():
+            activity_logger.info("[동네DB 수집 시작 작업] 취소됨")
+            return
+        try:
+            exc = task.exception()
+        except asyncio.CancelledError:
+            activity_logger.info("[동네DB 수집 시작 작업] 취소됨")
+            return
+        if exc is not None:
+            error_logger.exception("[동네DB 수집 시작 작업 실패]", exc_info=(type(exc), exc, exc.__traceback__))
+
+    application = Application.builder().token(settings.telegram_bot_token).post_init(start_area_collection).build()
+    bot = DaangnBot(store, activity_logger, error_logger, settings.error_log, settings.admin_chat_ids)
+    bot.register(application)
+
+    notifier = TelegramNotifier(application.bot, error_logger)
+    monitor = DonationMonitor(store, scraper, notifier, activity_logger, error_logger)
 
     async def monitor_job(_context):
         await monitor.run_once()
@@ -63,11 +85,11 @@ def run_bot() -> None:
         interval=settings.scrape_interval_seconds,
         first=5,
         name="donation-monitor",
-    )
-    application.job_queue.run_once(
-        area_collection_job,
-        when=0,
-        name="area-db-collector-on-start",
+        job_kwargs={
+            "misfire_grace_time": settings.monitor_misfire_grace_seconds,
+            "coalesce": True,
+            "max_instances": 1,
+        },
     )
     application.job_queue.run_monthly(
         area_collection_job,

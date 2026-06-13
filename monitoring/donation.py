@@ -15,14 +15,24 @@ class DonationMonitor:
         store: JsonStore,
         scraper: DaangnScraper,
         notifier: TelegramNotifier,
+        activity_logger: logging.Logger,
         error_logger: logging.Logger,
     ) -> None:
         self.store = store
         self.scraper = scraper
         self.notifier = notifier
+        self.activity_logger = activity_logger
         self.error_logger = error_logger
+        self._lock = asyncio.Lock()
 
     async def run_once(self) -> None:
+        if self._lock.locked():
+            self.activity_logger.info("[나눔 모니터링] 이전 실행이 진행 중이어서 이번 실행을 건너뜁니다.")
+            return
+        async with self._lock:
+            await self._run_once()
+
+    async def _run_once(self) -> None:
         subscriptions_by_link = defaultdict(list)
         for subscription in iter_subscriptions(self.store.list_active_users()):
             subscriptions_by_link[subscription["detect_link"]].append(subscription)

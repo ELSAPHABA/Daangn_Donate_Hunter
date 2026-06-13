@@ -19,6 +19,7 @@ daangn-donate-hunter bot
 ## 동네DB 자동 수집
 
 `python main.py bot` 또는 컨테이너 기본 실행(`daangn-donate-hunter bot`)을 시작하면 동네DB 수집도 백그라운드에서 즉시 시작됩니다.
+시작 수집은 Telegram 초기화가 끝난 뒤 별도 백그라운드 작업으로 실행되므로, 컨테이너 OS나 초기 네트워크 지연으로 JobQueue 즉시 실행 잡이 누락되는 문제를 피합니다.
 
 - 시작 번호: `scrape_state.json`의 `last_area_number + 1`
 - 최초 실행: `last_area_number` 기본값이 `0`이면 `AREA_COLLECTION_START_NUMBER`부터 시작
@@ -31,6 +32,15 @@ daangn-donate-hunter bot
 수집된 동네는 `areas.json`에 즉시 저장되고, 마지막 수집/확인 번호는 `scrape_state.json`에 저장됩니다.
 Docker 배포에서는 `daangn-donate-hunter-data:/data` 볼륨을 사용하므로 컨테이너가 재생성되어도 `last_area_number`가 유지됩니다.
 불일치가 발생해도 30회 연속에 도달하기 전 정상 동네 번호를 다시 만나면 연속 불일치 횟수는 0으로 초기화됩니다.
+
+## 나눔 모니터링
+
+유저가 등록한 구독은 기본 60초마다 확인합니다.
+
+- 모니터링 주기: `SCRAPE_INTERVAL_SECONDS` 기본값 60초
+- misfire 허용 시간: `MONITOR_MISFIRE_GRACE_SECONDS` 기본값 300초
+- 중복 실행 방지: 이전 모니터링 회차가 아직 실행 중이면 다음 회차는 건너뜁니다.
+- 지연 회차 처리: 컨테이너 pause/unpause 또는 호스트 지연으로 여러 회차가 밀리면 `coalesce=True`로 한 번만 실행합니다.
 
 런타임 데이터는 `data/`, 사용자 활동 로그는 `user_activity.log`, 오류 로그는 `error.log`에 저장됩니다.
 
