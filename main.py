@@ -73,7 +73,14 @@ def run_bot() -> None:
     bot.register(application)
 
     notifier = TelegramNotifier(application.bot, error_logger)
-    monitor = DonationMonitor(store, scraper, notifier, activity_logger, error_logger)
+    monitor = DonationMonitor(
+        store,
+        scraper,
+        notifier,
+        activity_logger,
+        error_logger,
+        retry_delay_seconds=settings.monitor_retry_delay_seconds,
+    )
 
     async def monitor_job(_context):
         await monitor.run_once()
