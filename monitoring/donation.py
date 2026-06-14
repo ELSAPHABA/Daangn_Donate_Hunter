@@ -25,7 +25,6 @@ class DonationMonitor:
         self.activity_logger = activity_logger
         self.error_logger = error_logger
         self.retry_delay_seconds = max(1, retry_delay_seconds)
-        self._is_first_scan = True
         self._lock = asyncio.Lock()
 
     async def run_once(self) -> None:
@@ -40,12 +39,11 @@ class DonationMonitor:
         for subscription in iter_subscriptions(self.store.list_active_users()):
             subscriptions_by_link[subscription["detect_link"]].append(subscription)
 
-        is_first_scan = self._is_first_scan
         for detect_link, subscriptions in subscriptions_by_link.items():
             item = await self._fetch_latest_item_with_retry(detect_link)
             previous = self.store.get_latest_item_url(detect_link)
             self.store.set_latest_item_url(detect_link, item.url)
-            if is_first_scan or previous is None or previous != item.url:
+            if previous is None or previous != item.url:
                 for subscription in subscriptions:
                     await self.notifier.send_donation_alert(
                         chat_id=subscription["chat_id"],
@@ -53,7 +51,6 @@ class DonationMonitor:
                         keyword=subscription["keyword"],
                         product_url=item.url,
                     )
-        self._is_first_scan = False
 
     async def _fetch_latest_item_with_retry(self, detect_link: str):
         while True:
