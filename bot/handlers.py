@@ -49,6 +49,10 @@ def region_keyboard() -> ReplyKeyboardMarkup:
     )
 
 
+def region_input_keyboard() -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup([[BTN_BACK]], resize_keyboard=True)
+
+
 def keyword_keyboard() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         [[BTN_KEYWORD_LIST, BTN_KEYWORD_ADD], [BTN_KEYWORD_DELETE, BTN_BACK]],
@@ -157,8 +161,8 @@ class DaangnBot:
             return CHOOSING
         if text == BTN_REGION_ADD:
             await update.message.reply_text(
-                "추가하실 동네를 입력해 주세요. [XX도 XX시 (XX구) XX동] 형식으로 입력해 주세요.",
-                reply_markup=ReplyKeyboardMarkup([[BTN_BACK]], resize_keyboard=True),
+                "추가하실 동네 주소 또는 동네 번호를 입력해 주세요.",
+                reply_markup=region_input_keyboard(),
             )
             return ADD_REGION
         if text == BTN_REGION_DELETE:
@@ -218,13 +222,32 @@ class DaangnBot:
             return await self.settings(update, context)
         chat_id = update.effective_chat.id
         cleaned = sanitize_query_text(update.message.text)
-        region = self.store.find_region(cleaned)
-        if not region:
-            await update.message.reply_text("해당되는 동네가 없습니다. 다시 입력해주세요.", reply_markup=region_keyboard())
-            return CHOOSING
+        matches = self.store.find_regions(cleaned)
+        if not matches:
+            await update.message.reply_text(
+                "해당되는 동네 주소 또는 번호가 없습니다. 다시 입력해 주세요.",
+                reply_markup=region_input_keyboard(),
+            )
+            return ADD_REGION
+        if len(matches) > 1:
+            display_limit = 20
+            displayed_matches = matches[:display_limit]
+            lines = "\n".join(f"- {region.full_name}" for region in displayed_matches)
+            if len(matches) > display_limit:
+                lines += f"\n외 {len(matches) - display_limit}개"
+            await update.message.reply_text(
+                (
+                    f"해당되는 동네가 {len(matches)}개 있습니다:\n"
+                    f"{lines}\n"
+                    "추가하실 동네를 입력해 주세요."
+                ),
+                reply_markup=region_input_keyboard(),
+            )
+            return ADD_REGION
+        region = matches[0]
         if not self.store.add_region(chat_id, region):
-            await update.message.reply_text("이미 탐지중인 동네입니다.", reply_markup=region_keyboard())
-            return CHOOSING
+            await update.message.reply_text("이미 탐지중인 동네입니다. 다시 입력해 주세요.", reply_markup=region_input_keyboard())
+            return ADD_REGION
         self.activity_logger.info("[%s] [탐지 동네 추가] %s", chat_id, region.full_name)
         await update.message.reply_text(f"{region.full_name}이 추가되었습니다.", reply_markup=region_keyboard())
         return CHOOSING

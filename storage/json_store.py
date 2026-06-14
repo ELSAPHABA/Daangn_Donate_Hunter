@@ -29,14 +29,31 @@ class JsonStore:
             return dict(self._read_json(self.areas_path, {}))
 
     def find_region(self, user_input: str) -> Region | None:
-        needle = " ".join(user_input.split())
-        areas = self.list_areas()
-        if needle in areas:
-            return Region(needle, str(areas[needle]))
-        matches = [(name, code) for name, code in areas.items() if name.endswith(needle)]
+        matches = self.find_regions(user_input)
         if len(matches) == 1:
-            return Region(matches[0][0], str(matches[0][1]))
+            return matches[0]
         return None
+
+    def find_regions(self, user_input: str) -> list[Region]:
+        needle = " ".join(user_input.split())
+        if not needle:
+            return []
+        areas = self.list_areas()
+        if needle.isdecimal():
+            normalized_code = str(int(needle))
+            return [
+                Region(name, str(code))
+                for name, code in areas.items()
+                if str(code) in {needle, normalized_code}
+            ]
+        if needle in areas:
+            return [Region(needle, str(areas[needle]))]
+        compact_needle = "".join(needle.split())
+        return [
+            Region(name, str(code))
+            for name, code in areas.items()
+            if needle in name or compact_needle in "".join(name.split())
+        ]
 
     def upsert_areas(self, areas: dict[str, str], last_area_number: int | None = None) -> None:
         with self._lock:
