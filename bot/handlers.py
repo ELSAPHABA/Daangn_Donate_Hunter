@@ -15,7 +15,7 @@ from telegram.ext import (
 )
 
 from core.models import ALL_KEYWORD
-from core.query import normalize_keyword, sanitize_query_text
+from core.query import normalize_keyword, normalize_user_query_text
 from storage import JsonStore
 
 
@@ -58,6 +58,10 @@ def keyword_keyboard() -> ReplyKeyboardMarkup:
         [[BTN_KEYWORD_LIST, BTN_KEYWORD_ADD], [BTN_KEYWORD_DELETE, BTN_BACK]],
         resize_keyboard=True,
     )
+
+
+def keyword_input_keyboard() -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup([[ALL_KEYWORD], [BTN_BACK]], resize_keyboard=True)
 
 
 class DaangnBot:
@@ -185,7 +189,7 @@ class DaangnBot:
         if text == BTN_KEYWORD_ADD:
             await update.message.reply_text(
                 "추가하실 키워드를 입력해 주세요. 전체 탐지는 전체를 선택하세요.",
-                reply_markup=ReplyKeyboardMarkup([[ALL_KEYWORD], [BTN_BACK]], resize_keyboard=True),
+                reply_markup=keyword_input_keyboard(),
             )
             return ADD_KEYWORD
         if text == BTN_KEYWORD_DELETE:
@@ -221,7 +225,13 @@ class DaangnBot:
         if update.message.text == BTN_BACK:
             return await self.settings(update, context)
         chat_id = update.effective_chat.id
-        cleaned = sanitize_query_text(update.message.text)
+        cleaned = normalize_user_query_text(update.message.text)
+        if cleaned is None:
+            await update.message.reply_text(
+                "동네 입력이 비어 있거나 너무 깁니다. 다시 입력해 주세요.",
+                reply_markup=region_input_keyboard(),
+            )
+            return ADD_REGION
         matches = self.store.find_regions(cleaned)
         if not matches:
             await update.message.reply_text(
@@ -271,10 +281,17 @@ class DaangnBot:
         if update.message.text == BTN_BACK:
             return await self.settings(update, context)
         chat_id = update.effective_chat.id
-        keyword = normalize_keyword(update.message.text)
+        cleaned = normalize_user_query_text(update.message.text)
+        if cleaned is None:
+            await update.message.reply_text(
+                "키워드 입력이 비어 있거나 너무 깁니다. 다시 입력해 주세요.",
+                reply_markup=keyword_input_keyboard(),
+            )
+            return ADD_KEYWORD
+        keyword = normalize_keyword(cleaned)
         if not self.store.add_keyword(chat_id, keyword):
-            await update.message.reply_text("이미 탐지중인 키워드입니다.", reply_markup=keyword_keyboard())
-            return CHOOSING
+            await update.message.reply_text("이미 탐지중인 키워드입니다. 다시 입력해 주세요.", reply_markup=keyword_input_keyboard())
+            return ADD_KEYWORD
         self.activity_logger.info("[%s] [탐지 키워드 추가] %s", chat_id, keyword)
         message = "전체를 탐지합니다." if keyword == ALL_KEYWORD else f"{keyword}가 추가되었습니다."
         await update.message.reply_text(message, reply_markup=keyword_keyboard())
@@ -287,7 +304,10 @@ class DaangnBot:
         if update.message.text == BTN_BACK:
             return await self.settings(update, context)
         chat_id = update.effective_chat.id
-        keyword = normalize_keyword(update.message.text)
+        keyword = normalize_user_query_text(update.message.text)
+        if keyword is None:
+            await update.message.reply_text("키워드를 다시 입력해 주세요.", reply_markup=keyword_keyboard())
+            return CHOOSING
         if not self.store.remove_keyword(chat_id, keyword):
             await update.message.reply_text("해당 키워드는 탐지중이지 않습니다.", reply_markup=keyword_keyboard())
             return CHOOSING

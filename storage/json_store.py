@@ -8,7 +8,7 @@ from tempfile import NamedTemporaryFile
 from typing import Any
 
 from core.models import ALL_KEYWORD, Region, Subscription
-from core.query import build_detect_link
+from core.query import build_detect_link, normalize_user_query_text
 
 
 class JsonStore:
@@ -35,12 +35,12 @@ class JsonStore:
         return None
 
     def find_regions(self, user_input: str) -> list[Region]:
-        needle = " ".join(user_input.split())
-        if not needle:
+        needle = normalize_user_query_text(user_input)
+        if needle is None:
             return []
         areas = self.list_areas()
         if needle.isdecimal():
-            normalized_code = str(int(needle))
+            normalized_code = needle.lstrip("0") or "0"
             return [
                 Region(name, str(code))
                 for name, code in areas.items()
@@ -127,25 +127,31 @@ class JsonStore:
             return Region(removed["full_name"], str(removed["code"]))
 
     def add_keyword(self, chat_id: int | str, keyword: str) -> bool:
+        normalized_keyword = normalize_user_query_text(keyword)
+        if normalized_keyword is None:
+            return False
         with self._lock:
             data = self._read_users()
             user = self._require_user(data, str(chat_id))
             keywords = user.setdefault("keywords", [])
-            if keyword in keywords:
+            if normalized_keyword in keywords:
                 return False
-            keywords.append(keyword)
+            keywords.append(normalized_keyword)
             self._refresh_subscriptions(user)
             self._write_json(self.users_path, data)
             return True
 
     def remove_keyword(self, chat_id: int | str, keyword: str) -> bool:
+        normalized_keyword = normalize_user_query_text(keyword)
+        if normalized_keyword is None:
+            return False
         with self._lock:
             data = self._read_users()
             user = self._require_user(data, str(chat_id))
             keywords = user.setdefault("keywords", [])
-            if keyword not in keywords:
+            if normalized_keyword not in keywords:
                 return False
-            user["keywords"] = [item for item in keywords if item != keyword]
+            user["keywords"] = [item for item in keywords if item != normalized_keyword]
             self._refresh_subscriptions(user)
             self._write_json(self.users_path, data)
             return True
