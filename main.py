@@ -80,6 +80,8 @@ def run_bot() -> None:
         activity_logger,
         error_logger,
         retry_delay_seconds=settings.monitor_retry_delay_seconds,
+        concurrency=settings.monitor_concurrency,
+        max_retries=settings.monitor_max_retries,
     )
 
     async def monitor_job(_context):
