@@ -15,7 +15,7 @@ class TelegramNotifier:
             await self.bot.send_message(
                 chat_id=chat_id,
                 text=(
-                    f"[{dong_name}][{keyword}] 새 나눔 알림:\n"
+                    f"[{dong_name}] [{keyword}] 새 나눔 알림:\n"
                     f"{product_url}"
                 ),
                 disable_web_page_preview=False,
