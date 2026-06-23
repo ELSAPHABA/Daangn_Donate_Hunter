@@ -10,12 +10,21 @@ from typing import Any
 from core.models import ALL_KEYWORD, Region, Subscription
 from core.query import build_detect_link, normalize_user_query_text
 
+RECENT_ITEM_URL_LIMIT = 100
+
 
 class JsonStore:
-    def __init__(self, users_path: Path, areas_path: Path, state_path: Path) -> None:
+    def __init__(
+        self,
+        users_path: Path,
+        areas_path: Path,
+        state_path: Path,
+        recent_item_url_limit: int = RECENT_ITEM_URL_LIMIT,
+    ) -> None:
         self.users_path = users_path
         self.areas_path = areas_path
         self.state_path = state_path
+        self.recent_item_url_limit = max(1, recent_item_url_limit)
         self._lock = threading.RLock()
         for path, default in (
             (self.users_path, {"users": []}),
@@ -165,14 +174,25 @@ class JsonStore:
 
     def get_latest_item_url(self, detect_link: str) -> str | None:
         with self._lock:
-            return self._read_json(self.state_path, {}).get("latest_items", {}).get(detect_link)
+            item_urls = self._coerce_item_urls(
+                self._read_json(self.state_path, {}).get("latest_items", {}).get(detect_link)
+            )
+            return item_urls[0] if item_urls else None
 
     def set_latest_item_url(self, detect_link: str, item_url: str) -> None:
+        self.remember_latest_item_url(detect_link, item_url)
+
+    def remember_latest_item_url(self, detect_link: str, item_url: str) -> bool:
         with self._lock:
             state = self._read_json(self.state_path, {})
             latest = state.setdefault("latest_items", {})
-            latest[detect_link] = item_url
+            seen_urls = self._coerce_item_urls(latest.get(detect_link))
+            is_new = item_url not in seen_urls
+            latest[detect_link] = [item_url, *(url for url in seen_urls if url != item_url)][
+                : self.recent_item_url_limit
+            ]
             self._write_json(self.state_path, state)
+            return is_new
 
     def _refresh_subscriptions(self, user: dict[str, Any]) -> None:
         saved_keywords = user.get("keywords") or []
@@ -244,6 +264,13 @@ class JsonStore:
             tmp.write("\n")
             tmp_path = Path(tmp.name)
         tmp_path.replace(path)
+
+    def _coerce_item_urls(self, value: Any) -> list[str]:
+        if isinstance(value, str):
+            return [value] if value else []
+        if isinstance(value, list):
+            return [item for item in value if isinstance(item, str) and item]
+        return []
 
 
 def _subscription_from_dict(item: dict[str, Any]) -> Subscription:

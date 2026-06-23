@@ -26,6 +26,7 @@ class Settings:
     monitor_retry_delay_seconds: int = 60
     monitor_concurrency: int = 3
     monitor_max_retries: int = 1
+    monitor_recent_items_limit: int = 100
     scrape_timeout_seconds: int = 10
     area_collection_start_number: int = 1
     area_collection_delay_seconds: int = 10
@@ -59,6 +60,7 @@ def load_settings() -> Settings:
         monitor_retry_delay_seconds=int(os.getenv("MONITOR_RETRY_DELAY_SECONDS", "60")),
         monitor_concurrency=int(os.getenv("MONITOR_CONCURRENCY", "3")),
         monitor_max_retries=int(os.getenv("MONITOR_MAX_RETRIES", "1")),
+        monitor_recent_items_limit=int(os.getenv("MONITOR_RECENT_ITEMS_LIMIT", "100")),
         scrape_timeout_seconds=int(os.getenv("SCRAPE_TIMEOUT_SECONDS", "10")),
         area_collection_start_number=int(os.getenv("AREA_COLLECTION_START_NUMBER", "11")),
         area_collection_delay_seconds=int(os.getenv("AREA_COLLECTION_DELAY_SECONDS", "10")),

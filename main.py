@@ -20,7 +20,12 @@ def build_components():
     settings = load_settings()
     settings.data_dir.mkdir(parents=True, exist_ok=True)
     activity_logger, error_logger = configure_logging(settings.user_activity_log, settings.error_log)
-    store = JsonStore(settings.users_path, settings.areas_path, settings.state_path)
+    store = JsonStore(
+        settings.users_path,
+        settings.areas_path,
+        settings.state_path,
+        recent_item_url_limit=settings.monitor_recent_items_limit,
+    )
     user_agent_manager = UserAgentManager(settings.user_agent_file)
     proxy_rotator = ProxyRotator.from_env(settings.proxy_rotate_seconds)
     scraper = DaangnScraper(

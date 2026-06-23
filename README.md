@@ -41,6 +41,7 @@ Docker 배포에서는 `daangn-donate-hunter-data:/data` 볼륨을 사용하므�
 - 모니터링 주기: `SCRAPE_INTERVAL_SECONDS` 기본값 60초
 - misfire 허용 시간: `MONITOR_MISFIRE_GRACE_SECONDS` 기본값 300초
 - 동시 처리 수: `MONITOR_CONCURRENCY` 기본값 3개
+- 중복 알림 방지 보관 수: `MONITOR_RECENT_ITEMS_LIMIT` 기본값 100개
 - 첫 스캔 알림: 링크별 저장된 이전 상품이 없거나 이전 상품과 현재 최신 상품이 다를 때만 알림을 전송합니다.
 - 실패 처리: 타임아웃, 스크래핑 실패, 최신 상품 미검출 시 최대 `MONITOR_MAX_RETRIES`회 시도하고 실패한 링크만 이번 회차에서 건너뜁니다. (`MONITOR_RETRY_DELAY_SECONDS`로 시도 사이 대기 시간 조정 가능)
 - 중복 실행 방지: 이전 모니터링 회차가 아직 실행 중이면 다음 회차는 건너뜁니다.

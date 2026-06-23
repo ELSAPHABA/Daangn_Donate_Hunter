@@ -54,9 +54,7 @@ class DonationMonitor:
                         self.activity_logger.warning("[나눔 모니터링 스킵] link=%s", detect_link)
                         return
 
-                    previous = self.store.get_latest_item_url(detect_link)
-                    self.store.set_latest_item_url(detect_link, item.url)
-                    if previous is None or previous != item.url:
+                    if self.store.remember_latest_item_url(detect_link, item.url):
                         for subscription in subscriptions:
                             await self.notifier.send_donation_alert(
                                 chat_id=subscription["chat_id"],
