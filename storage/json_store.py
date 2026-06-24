@@ -29,7 +29,7 @@ class JsonStore:
         for path, default in (
             (self.users_path, {"users": []}),
             (self.areas_path, {}),
-            (self.state_path, {"latest_items": {}, "last_area_number": 0}),
+            (self.state_path, {"latest_items": {}, "notified_items": {}, "last_area_number": 0}),
         ):
             self._ensure_file(path, default)
 
@@ -189,6 +189,18 @@ class JsonStore:
             seen_urls = self._coerce_item_urls(latest.get(detect_link))
             is_new = item_url not in seen_urls
             latest[detect_link] = [item_url, *(url for url in seen_urls if url != item_url)][
+                : self.recent_item_url_limit
+            ]
+            self._write_json(self.state_path, state)
+            return is_new
+
+    def remember_notified_item_url(self, chat_id: int | str, item_url: str) -> bool:
+        with self._lock:
+            state = self._read_json(self.state_path, {})
+            notified = state.setdefault("notified_items", {})
+            seen_urls = self._coerce_item_urls(notified.get(str(chat_id)))
+            is_new = item_url not in seen_urls
+            notified[str(chat_id)] = [item_url, *(url for url in seen_urls if url != item_url)][
                 : self.recent_item_url_limit
             ]
             self._write_json(self.state_path, state)

@@ -56,6 +56,8 @@ class DonationMonitor:
 
                     if self.store.remember_latest_item_url(detect_link, item.url):
                         for subscription in subscriptions:
+                            if not self.store.remember_notified_item_url(subscription["chat_id"], item.url):
+                                continue
                             await self.notifier.send_donation_alert(
                                 chat_id=subscription["chat_id"],
                                 dong_name=subscription["region"]["dong_name"],
