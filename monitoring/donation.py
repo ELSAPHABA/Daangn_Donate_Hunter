@@ -62,13 +62,15 @@ class DonationMonitor:
                                 chat_id=subscription["chat_id"],
                                 dong_name=subscription["region"]["dong_name"],
                                 keyword=subscription["keyword"],
+                                product_title=item.title,
                                 product_url=item.url,
                             )
                             self.activity_logger.info(
-                                "[나눔 알림 발송] chat_id=%s dong=%s keyword=%s url=%s",
+                                "[나눔 알림 발송] chat_id=%s dong=%s keyword=%s title=%s url=%s",
                                 subscription["chat_id"],
                                 subscription["region"]["dong_name"],
                                 subscription["keyword"],
+                                item.title,
                                 item.url,
                             )
                 except Exception as exc:

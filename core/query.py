@@ -45,6 +45,17 @@ def normalize_daangn_url(href: str) -> str | None:
     return None
 
 
+def shorten_daangn_product_url(url: str) -> str:
+    parsed = urlparse(url)
+    if parsed.netloc != "www.daangn.com":
+        return url
+    parts = [part for part in parsed.path.split("/") if part]
+    if len(parts) >= 3 and parts[:2] == ["kr", "buy-sell"]:
+        product_id = parts[2].rsplit("-", 1)[-1]
+        return f"{DAANGN_ORIGIN}/kr/buy-sell/{product_id}/"
+    return url
+
+
 def _normalize_region_code(value: str) -> str:
     cleaned = sanitize_query_text(value)
     if not cleaned.isdecimal():
