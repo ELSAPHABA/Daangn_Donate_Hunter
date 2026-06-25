@@ -64,6 +64,13 @@ class DonationMonitor:
                                 keyword=subscription["keyword"],
                                 product_url=item.url,
                             )
+                            self.activity_logger.info(
+                                "[나눔 알림 발송] chat_id=%s dong=%s keyword=%s url=%s",
+                                subscription["chat_id"],
+                                subscription["region"]["dong_name"],
+                                subscription["keyword"],
+                                item.url,
+                            )
                 except Exception as exc:
                     self.error_logger.error("[나눔 모니터링 작업 실패] link=%s error=%s", detect_link, exc)
 
