@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Final
 
-from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
+from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -31,13 +31,12 @@ BTN_KEYWORD_ADD: Final = "탐지 키워드 추가"
 BTN_KEYWORD_DELETE: Final = "탐지 키워드 삭제"
 BTN_NOTIFICATION: Final = "알림 설정"
 BTN_BACK: Final = "돌아가기"
-BTN_KEYBOARD_OFF: Final = "키보드 끄기"
 BTN_ERROR_LOG: Final = "오류 로그 조회"
 
 
 def main_keyboard() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
-        [[BTN_REGION_MENU, BTN_KEYWORD_MENU], [BTN_NOTIFICATION, BTN_KEYBOARD_OFF]],
+        [[BTN_REGION_MENU, BTN_KEYWORD_MENU], [BTN_NOTIFICATION]],
         resize_keyboard=True,
     )
 
@@ -101,11 +100,8 @@ class DaangnBot:
         )
         application.add_handler(CommandHandler("start", self.start))
         application.add_handler(CommandHandler("help", self.help))
-        application.add_handler(CommandHandler("keyboardon", self.keyboard_on))
-        application.add_handler(CommandHandler("keyboardoff", self.keyboard_off))
         application.add_handler(CommandHandler("manage", self.manage))
         application.add_handler(conversation)
-        application.add_handler(MessageHandler(filters.Regex(f"^{BTN_KEYBOARD_OFF}$"), self.keyboard_off))
         application.add_handler(MessageHandler(filters.Regex(f"^{BTN_ERROR_LOG}$"), self.reply_error_log))
 
     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -124,18 +120,9 @@ class DaangnBot:
 
     async def help(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text(
-            "/keyboardon: 키보드 버튼 켜기\n"
-            "/keyboardoff: 키보드 버튼 끄기\n"
             "/settings: 탐지 및 알림 설정\n"
             "/help: 도움말"
         )
-
-    async def keyboard_on(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        await update.message.reply_text("키보드 버튼을 켰습니다.", reply_markup=main_keyboard())
-
-    async def keyboard_off(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-        await update.message.reply_text("키보드 버튼을 껐습니다.", reply_markup=ReplyKeyboardRemove())
-        return ConversationHandler.END
 
     async def manage(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if not self._is_admin(update):
@@ -213,8 +200,6 @@ class DaangnBot:
         if text == BTN_ERROR_LOG:
             await self.reply_error_log(update, context)
             return CHOOSING
-        if text == BTN_KEYBOARD_OFF:
-            return await self.keyboard_off(update, context)
         if text == BTN_BACK:
             await update.message.reply_text("설정 메뉴로 돌아갑니다.", reply_markup=main_keyboard())
             return CHOOSING
