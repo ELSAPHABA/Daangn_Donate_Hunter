@@ -5,6 +5,7 @@ import asyncio
 from datetime import time
 from zoneinfo import ZoneInfo
 
+from telegram import BotCommand
 from telegram.ext import Application
 
 from bot import DaangnBot
@@ -53,7 +54,14 @@ def run_bot() -> None:
         mismatch_stop_threshold=settings.area_collection_mismatch_stop_threshold,
     )
 
-    async def start_area_collection(application: Application) -> None:
+    async def post_init(application: Application) -> None:
+        await application.bot.set_my_commands(
+            [
+                BotCommand("start", "봇 시작"),
+                BotCommand("settings", "탐지 및 알림 설정"),
+                BotCommand("help", "도움말"),
+            ]
+        )
         task = asyncio.create_task(
             area_collector.collect_from_next_number(),
             name="area-db-collector-on-start",
@@ -73,7 +81,7 @@ def run_bot() -> None:
         if exc is not None:
             error_logger.exception("[동네DB 수집 시작 작업 실패]", exc_info=(type(exc), exc, exc.__traceback__))
 
-    application = Application.builder().token(settings.telegram_bot_token).post_init(start_area_collection).build()
+    application = Application.builder().token(settings.telegram_bot_token).post_init(post_init).build()
     bot = DaangnBot(store, activity_logger, error_logger, settings.error_log, settings.admin_chat_ids)
     bot.register(application)
 
