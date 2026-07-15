@@ -82,6 +82,15 @@ class DaangnBot:
         conversation = ConversationHandler(
             entry_points=[
                 CommandHandler("settings", self.settings),
+                CommandHandler("areasetting", self.area_setting),
+                CommandHandler("areaview", self.area_view),
+                CommandHandler("areaadd", self.area_add),
+                CommandHandler("areadelete", self.area_delete),
+                CommandHandler("keywordsetting", self.keyword_setting),
+                CommandHandler("keywordview", self.keyword_view),
+                CommandHandler("keywordadd", self.keyword_add),
+                CommandHandler("keyworddelete", self.keyword_delete),
+                CommandHandler("arlam", self.notification_setting),
                 MessageHandler(filters.Regex(f"^{BTN_REGION_MENU}$|^{BTN_KEYWORD_MENU}$|^{BTN_NOTIFICATION}$"), self.handle_choice),
             ],
             states={
@@ -118,6 +127,77 @@ class DaangnBot:
         await update.message.reply_text("설정할 항목을 선택하세요.", reply_markup=main_keyboard())
         return CHOOSING
 
+    async def area_setting(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+        self.store.ensure_user(update.effective_chat.id)
+        await update.message.reply_text("탐지 동네 설정을 선택하세요.", reply_markup=region_keyboard())
+        return CHOOSING
+
+    async def area_view(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+        self.store.ensure_user(update.effective_chat.id)
+        await self._reply_region_list(update)
+        return CHOOSING
+
+    async def area_add(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+        self.store.ensure_user(update.effective_chat.id)
+        await update.message.reply_text(
+            "추가하실 동네 주소 또는 동네 번호를 입력해 주세요.",
+            reply_markup=region_input_keyboard(),
+        )
+        return ADD_REGION
+
+    async def area_delete(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+        self.store.ensure_user(update.effective_chat.id)
+        user = self.store.get_user(update.effective_chat.id) or {}
+        regions = user.get("regions", [])
+        if not regions:
+            await update.message.reply_text("탐지중인 동네가 없습니다.", reply_markup=region_keyboard())
+            return CHOOSING
+        await update.message.reply_text(
+            "삭제하실 동네를 선택하세요.",
+            reply_markup=ReplyKeyboardMarkup([[item["full_name"]] for item in regions] + [[BTN_BACK]], resize_keyboard=True),
+        )
+        return DELETE_REGION
+
+    async def keyword_setting(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+        self.store.ensure_user(update.effective_chat.id)
+        await update.message.reply_text("탐지 키워드 설정을 선택하세요.", reply_markup=keyword_keyboard())
+        return CHOOSING
+
+    async def keyword_view(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+        self.store.ensure_user(update.effective_chat.id)
+        await self._reply_keyword_list(update)
+        return CHOOSING
+
+    async def keyword_add(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+        self.store.ensure_user(update.effective_chat.id)
+        await update.message.reply_text(
+            "추가하실 키워드를 입력해 주세요. 전체 탐지는 전체를 선택하세요.",
+            reply_markup=keyword_input_keyboard(),
+        )
+        return ADD_KEYWORD
+
+    async def keyword_delete(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+        self.store.ensure_user(update.effective_chat.id)
+        user = self.store.get_user(update.effective_chat.id) or {}
+        keywords = user.get("keywords", [])
+        if not keywords:
+            await update.message.reply_text("탐지중인 키워드가 없습니다.", reply_markup=keyword_keyboard())
+            return CHOOSING
+        await update.message.reply_text(
+            "삭제하실 키워드를 선택하세요.",
+            reply_markup=ReplyKeyboardMarkup([[item] for item in keywords] + [[BTN_BACK]], resize_keyboard=True),
+        )
+        return DELETE_KEYWORD
+
+    async def notification_setting(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+        chat_id = update.effective_chat.id
+        user = self.store.get_user(chat_id) or self.store.ensure_user(chat_id)
+        enabled = not bool(user.get("notification", True))
+        self.store.set_notification(chat_id, enabled)
+        self.activity_logger.info("[%s] [알림 설정 변경] %s", chat_id, "시작" if enabled else "중지")
+        await update.message.reply_text(f"알림을 {'시작' if enabled else '중지'}했습니다.", reply_markup=main_keyboard())
+        return CHOOSING
+
     async def help(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text(
             "/settings: 탐지 및 알림 설정\n"
@@ -145,58 +225,23 @@ class DaangnBot:
         chat_id = update.effective_chat.id
         self.store.ensure_user(chat_id)
         if text == BTN_REGION_MENU:
-            await update.message.reply_text("탐지 동네 설정을 선택하세요.", reply_markup=region_keyboard())
-            return CHOOSING
+            return await self.area_setting(update, context)
         if text == BTN_REGION_LIST:
-            await self._reply_region_list(update)
-            return CHOOSING
+            return await self.area_view(update, context)
         if text == BTN_REGION_ADD:
-            await update.message.reply_text(
-                "추가하실 동네 주소 또는 동네 번호를 입력해 주세요.",
-                reply_markup=region_input_keyboard(),
-            )
-            return ADD_REGION
+            return await self.area_add(update, context)
         if text == BTN_REGION_DELETE:
-            user = self.store.get_user(chat_id) or {}
-            regions = user.get("regions", [])
-            if not regions:
-                await update.message.reply_text("탐지중인 동네가 없습니다.", reply_markup=region_keyboard())
-                return CHOOSING
-            await update.message.reply_text(
-                "삭제하실 동네를 선택하세요.",
-                reply_markup=ReplyKeyboardMarkup([[item["full_name"]] for item in regions] + [[BTN_BACK]], resize_keyboard=True),
-            )
-            return DELETE_REGION
+            return await self.area_delete(update, context)
         if text == BTN_KEYWORD_MENU:
-            await update.message.reply_text("탐지 키워드 설정을 선택하세요.", reply_markup=keyword_keyboard())
-            return CHOOSING
+            return await self.keyword_setting(update, context)
         if text == BTN_KEYWORD_LIST:
-            await self._reply_keyword_list(update)
-            return CHOOSING
+            return await self.keyword_view(update, context)
         if text == BTN_KEYWORD_ADD:
-            await update.message.reply_text(
-                "추가하실 키워드를 입력해 주세요. 전체 탐지는 전체를 선택하세요.",
-                reply_markup=keyword_input_keyboard(),
-            )
-            return ADD_KEYWORD
+            return await self.keyword_add(update, context)
         if text == BTN_KEYWORD_DELETE:
-            user = self.store.get_user(chat_id) or {}
-            keywords = user.get("keywords", [])
-            if not keywords:
-                await update.message.reply_text("탐지중인 키워드가 없습니다.", reply_markup=keyword_keyboard())
-                return CHOOSING
-            await update.message.reply_text(
-                "삭제하실 키워드를 선택하세요.",
-                reply_markup=ReplyKeyboardMarkup([[item] for item in keywords] + [[BTN_BACK]], resize_keyboard=True),
-            )
-            return DELETE_KEYWORD
+            return await self.keyword_delete(update, context)
         if text == BTN_NOTIFICATION:
-            user = self.store.get_user(chat_id) or self.store.ensure_user(chat_id)
-            enabled = not bool(user.get("notification", True))
-            self.store.set_notification(chat_id, enabled)
-            self.activity_logger.info("[%s] [알림 설정 변경] %s", chat_id, "시작" if enabled else "중지")
-            await update.message.reply_text(f"알림을 {'시작' if enabled else '중지'}했습니다.", reply_markup=main_keyboard())
-            return CHOOSING
+            return await self.notification_setting(update, context)
         if text == BTN_ERROR_LOG:
             await self.reply_error_log(update, context)
             return CHOOSING

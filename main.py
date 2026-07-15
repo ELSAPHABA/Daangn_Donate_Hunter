@@ -59,6 +59,15 @@ def run_bot() -> None:
             [
                 BotCommand("start", "봇 시작"),
                 BotCommand("settings", "탐지 및 알림 설정"),
+                BotCommand("areasetting", "탐지 동네 설정"),
+                BotCommand("areaview", "탐지 동네 조회"),
+                BotCommand("areaadd", "탐지 동네 추가"),
+                BotCommand("areadelete", "탐지 동네 삭제"),
+                BotCommand("keywordsetting", "탐지 키워드 설정"),
+                BotCommand("keywordview", "탐지 키워드 조회"),
+                BotCommand("keywordadd", "탐지 키워드 추가"),
+                BotCommand("keyworddelete", "탐지 키워드 삭제"),
+                BotCommand("arlam", "알림 설정"),
                 BotCommand("help", "도움말"),
             ]
         )
