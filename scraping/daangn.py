@@ -228,4 +228,4 @@ class DaangnScraper:
 def iter_subscriptions(users: list[dict]) -> Iterator[dict]:
     for user in users:
         for subscription in user.get("subscriptions", []):
-            yield {"chat_id": user["chat_id"], **subscription}
+            yield {"chat_id": user["chat_id"], "skip_keywords": user.get("skip_keywords", []), **subscription}

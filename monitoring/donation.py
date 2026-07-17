@@ -5,6 +5,7 @@ import logging
 from collections import defaultdict
 
 from core import ScrapedItem
+from core.query import keyword_matches_text
 from notifications import TelegramNotifier
 from scraping import DaangnScraper, iter_subscriptions
 from storage import JsonStore
@@ -56,6 +57,23 @@ class DonationMonitor:
 
                     if self.store.remember_latest_item_url(detect_link, item.url):
                         for subscription in subscriptions:
+                            matched_skip_keyword = next(
+                                (
+                                    keyword
+                                    for keyword in subscription.get("skip_keywords", [])
+                                    if keyword_matches_text(keyword, item.title)
+                                ),
+                                None,
+                            )
+                            if matched_skip_keyword is not None:
+                                self.activity_logger.info(
+                                    "[나눔 알림 제외] chat_id=%s skip_keyword=%s title=%s url=%s",
+                                    subscription["chat_id"],
+                                    matched_skip_keyword,
+                                    item.title,
+                                    item.url,
+                                )
+                                continue
                             if not self.store.remember_notified_item_url(subscription["chat_id"], item.url):
                                 continue
                             await self.notifier.send_donation_alert(

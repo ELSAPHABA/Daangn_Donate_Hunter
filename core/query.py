@@ -28,6 +28,12 @@ def normalize_keyword(value: str | None) -> str:
     return cleaned if cleaned else ALL_KEYWORD
 
 
+def keyword_matches_text(keyword: str, text: str) -> bool:
+    haystack = sanitize_query_text(text).casefold()
+    tokens = sanitize_query_text(keyword).casefold().split()
+    return bool(tokens) and all(token in haystack for token in tokens)
+
+
 def build_detect_link(region: Region, keyword: str) -> str:
     query = f"price=0__0&in={quote_plus(_normalize_region_code(region.code))}"
     cleaned_keyword = sanitize_query_text(keyword)

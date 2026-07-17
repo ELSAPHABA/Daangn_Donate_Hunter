@@ -94,6 +94,7 @@ class JsonStore:
                     "notification": True,
                     "regions": [],
                     "keywords": [],
+                    "skip_keywords": [],
                     "subscriptions": [],
                 }
                 data["users"].append(user)
@@ -162,6 +163,34 @@ class JsonStore:
                 return False
             user["keywords"] = [item for item in keywords if item != normalized_keyword]
             self._refresh_subscriptions(user)
+            self._write_json(self.users_path, data)
+            return True
+
+    def add_skip_keyword(self, chat_id: int | str, keyword: str) -> bool:
+        normalized_keyword = normalize_user_query_text(keyword)
+        if normalized_keyword is None:
+            return False
+        with self._lock:
+            data = self._read_users()
+            user = self._require_user(data, str(chat_id))
+            skip_keywords = user.setdefault("skip_keywords", [])
+            if normalized_keyword in skip_keywords:
+                return False
+            skip_keywords.append(normalized_keyword)
+            self._write_json(self.users_path, data)
+            return True
+
+    def remove_skip_keyword(self, chat_id: int | str, keyword: str) -> bool:
+        normalized_keyword = normalize_user_query_text(keyword)
+        if normalized_keyword is None:
+            return False
+        with self._lock:
+            data = self._read_users()
+            user = self._require_user(data, str(chat_id))
+            skip_keywords = user.setdefault("skip_keywords", [])
+            if normalized_keyword not in skip_keywords:
+                return False
+            user["skip_keywords"] = [item for item in skip_keywords if item != normalized_keyword]
             self._write_json(self.users_path, data)
             return True
 
@@ -248,6 +277,7 @@ class JsonStore:
                 "notification": True,
                 "regions": [],
                 "keywords": [],
+                "skip_keywords": [],
                 "subscriptions": [],
             }
             data["users"].append(user)

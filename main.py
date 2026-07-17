@@ -67,6 +67,10 @@ def run_bot() -> None:
                 BotCommand("kwdview", "탐지 키워드 조회"),
                 BotCommand("kwdadd", "탐지 키워드 추가"),
                 BotCommand("kwddelete", "탐지 키워드 삭제"),
+                BotCommand("skipkwdsetting", "제외 키워드 설정"),
+                BotCommand("skipkwdview", "제외 키워드 조회"),
+                BotCommand("skipkwdadd", "제외 키워드 추가"),
+                BotCommand("skipkwddelete", "제외 키워드 삭제"),
                 BotCommand("arlam", "알림 설정"),
                 BotCommand("help", "도움말"),
             ]
