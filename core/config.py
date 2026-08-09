@@ -32,7 +32,7 @@ class Settings:
     area_collection_delay_seconds: int = 10
     area_collection_retry_delay_seconds: int = 60
     area_collection_mismatch_stop_threshold: int = 30
-    proxy_rotate_seconds: int = 15 * 60
+    proxy_rotate_seconds: int = 30 * 60 # 기본값: 15 * 60
     user_agent_file: str = "user-agents.txt"
 
 
