@@ -45,6 +45,13 @@ class DonationMonitor:
         for subscription in iter_subscriptions(self.store.list_active_users()):
             subscriptions_by_link[subscription["detect_link"]].append(subscription)
 
+        if not subscriptions_by_link:
+            return
+
+        self.activity_logger.info(
+            "[나눔 모니터링 시작] 대상 링크 수: %s개", len(subscriptions_by_link)
+        )
+
         semaphore = asyncio.Semaphore(self.concurrency)
 
         async def process_link(detect_link: str, subscriptions: list[dict]) -> None:
@@ -72,7 +79,7 @@ class DonationMonitor:
                                     matched_skip_keyword,
                                     item.title,
                                     item.url,
-                                )
+                                    )
                                 continue
                             if not self.store.remember_notified_item_url(subscription["chat_id"], item.url):
                                 continue
@@ -102,27 +109,21 @@ class DonationMonitor:
         for attempt in range(1, self.max_retries + 1):
             try:
                 item = await asyncio.to_thread(self.scraper.fetch_latest_item, detect_link)
-            except TimeoutError as exc:
-                self.error_logger.error(
-                    "[스크래핑 타임아웃] link=%s attempt=%s/%s error=%s",
-                    detect_link,
-                    attempt,
-                    self.max_retries,
-                    exc,
-                )
             except Exception as exc:
+                cause = f" (원인: {exc.__cause__})" if getattr(exc, "__cause__", None) else ""
                 self.error_logger.error(
-                    "[스크래핑 실패] link=%s attempt=%s/%s error=%s",
+                    "[스크래핑 실패] link=%s attempt=%s/%s error=%s%s",
                     detect_link,
                     attempt,
                     self.max_retries,
                     exc,
+                    cause,
                 )
             else:
                 if item is not None:
                     return item
-                self.error_logger.error(
-                    "[스크래핑 결과 없음] link=%s attempt=%s/%s error=최신 상품을 찾지 못했습니다.",
+                self.activity_logger.info(
+                    "[스크래핑 결과 없음] link=%s attempt=%s/%s (최신 상품 없음)",
                     detect_link,
                     attempt,
                     self.max_retries,

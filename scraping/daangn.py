@@ -120,10 +120,16 @@ class DaangnScraper:
                 return response
             except requests.RequestException as exc:
                 last_error = exc
+                self.error_logger.warning(
+                    "[스크래핑 HTTP 요청 재시도] url=%s attempt=%s/2 error=%s",
+                    url,
+                    attempt + 1,
+                    exc,
+                )
                 if attempt == 0 and time.monotonic() < deadline:
                     time.sleep(min(1.0, max(0.0, deadline - time.monotonic())))
                     continue
-        raise TimeoutError(f"{url} 요청이 {self.timeout_seconds}초 내 완료되지 않았습니다.") from last_error
+        raise RuntimeError(f"{url} 요청 실패 ({self.timeout_seconds}초 제한 또는 통신 오류): {last_error}") from last_error
 
     def _extract_buy_sell_route_data(self, html: str) -> dict[str, Any]:
         script = self._find_remix_context_script(html)
