@@ -248,13 +248,14 @@ Proxy는 환경변수로 설정합니다. 값 자체는 민감 정보이므로 �
 
 | 환경변수 | 설명 |
 | --- | --- |
+| `PROXY_ENABLED` | Proxy 사용 활성화 여부 (`true` / `false`), 기본값 `true` |
 | `PROXY_HOST_1`, `PROXY_HOST_2`, ... | Proxy 호스트 목록 |
 | `PROXY_USER` | Proxy 사용자명 |
 | `PROXY_PASS` | Proxy 비밀번호 |
 | `PROXY_PORT` | Proxy 포트 |
 | `PROXY_ROTATE_SECONDS` | Proxy 로테이션 주기, 기본값 `900`초 |
 
-Proxy 정보가 모두 설정되어 있지 않으면 Proxy 없이 요청합니다.
+`PROXY_ENABLED`가 `false`이거나 Proxy 정보가 모두 설정되어 있지 않으면 Proxy 없이 직접 요청합니다.
 
 User-Agent는 `resources/user-agents.txt`에서 읽습니다. 기본적으로 20회 사용 후 다른 User-Agent로 교체됩니다.
 
@@ -278,6 +279,7 @@ User-Agent는 `resources/user-agents.txt`에서 읽습니다. 기본적으로 20
 | `AREA_COLLECTION_DELAY_SECONDS` | `10` | 동네DB 번호별 수집 간격 |
 | `AREA_COLLECTION_RETRY_DELAY_SECONDS` | `60` | 동네DB 실패 재시도 대기 |
 | `AREA_COLLECTION_MISMATCH_STOP_THRESHOLD` | `30` | 연속 번호 불일치 종료 기준 |
+| `PROXY_ENABLED` | `true` | Proxy 사용 여부 (`true` / `false`) |
 | `PROXY_ROTATE_SECONDS` | `900` | Proxy 로테이션 주기 |
 | `USER_AGENT_FILE` | `resources/user-agents.txt` | User-Agent 목록 파일 |
 

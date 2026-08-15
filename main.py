@@ -28,7 +28,7 @@ def build_components():
         recent_item_url_limit=settings.monitor_recent_items_limit,
     )
     user_agent_manager = UserAgentManager(settings.user_agent_file)
-    proxy_rotator = ProxyRotator.from_env(settings.proxy_rotate_seconds)
+    proxy_rotator = ProxyRotator.from_env(settings.proxy_rotate_seconds, enabled=settings.proxy_enabled)
     scraper = DaangnScraper(
         user_agent_manager=user_agent_manager,
         proxy_rotator=proxy_rotator,

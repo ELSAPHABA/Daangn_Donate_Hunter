@@ -15,9 +15,13 @@ class ProxyRotator:
     port: str = ""
     index: int = 0
     last_rotated_at: float = 0.0
+    enabled: bool = True
 
     @classmethod
-    def from_env(cls, rotate_seconds: int) -> "ProxyRotator":
+    def from_env(cls, rotate_seconds: int, enabled: bool | None = None) -> "ProxyRotator":
+        if enabled is None:
+            enabled = os.getenv("PROXY_ENABLED", "true").strip().lower() in {"1", "true", "yes", "on", "t"}
+
         def host_number(item: tuple[str, str]) -> int:
             suffix = item[0].removeprefix("PROXY_HOST_")
             return int(suffix) if suffix.isdigit() else 999
@@ -30,9 +34,12 @@ class ProxyRotator:
             password=os.getenv("PROXY_PASS", ""),
             port=os.getenv("PROXY_PORT", ""),
             last_rotated_at=time.monotonic(),
+            enabled=enabled,
         )
 
     def requests_proxy(self) -> dict[str, str] | None:
+        if not self.enabled:
+            return None
         if not (self.hosts and self.username and self.password and self.port):
             return None
         self._rotate_if_needed()

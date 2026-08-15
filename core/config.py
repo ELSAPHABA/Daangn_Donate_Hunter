@@ -33,6 +33,7 @@ class Settings:
     area_collection_retry_delay_seconds: int = 60
     area_collection_mismatch_stop_threshold: int = 30
     proxy_rotate_seconds: int = 30 * 60 # 기본값: 15 * 60
+    proxy_enabled: bool = True
     user_agent_file: str = "user-agents.txt"
 
 
@@ -42,6 +43,8 @@ def load_settings() -> Settings:
     user_agent_file = Path(os.getenv("USER_AGENT_FILE", "resources/user-agents.txt"))
     if not user_agent_file.is_absolute():
         user_agent_file = ROOT_DIR / user_agent_file
+    proxy_enabled_raw = os.getenv("PROXY_ENABLED", "true").strip().lower()
+    proxy_enabled = proxy_enabled_raw in {"1", "true", "yes", "on", "t"}
     return Settings(
         telegram_bot_token=os.getenv("TELEGRAM_BOT_TOKEN", "").strip(),
         data_dir=data_dir,
@@ -69,5 +72,6 @@ def load_settings() -> Settings:
             os.getenv("AREA_COLLECTION_MISMATCH_STOP_THRESHOLD", "30")
         ),
         proxy_rotate_seconds=int(os.getenv("PROXY_ROTATE_SECONDS", str(15 * 60))),
+        proxy_enabled=proxy_enabled,
         user_agent_file=str(user_agent_file),
     )

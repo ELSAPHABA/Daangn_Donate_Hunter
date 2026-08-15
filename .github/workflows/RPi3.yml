@@ -24,6 +24,7 @@ jobs:
       - name: Write env file
         run: |
           {
+            echo "PROXY_ENABLED=${{ secrets.PROXY_ENABLED }}"
             echo "PROXY_USER=${{ secrets.PROXY_USER }}"
             echo "PROXY_PASS=${{ secrets.PROXY_PASS }}"
             echo "PROXY_PORT=${{ secrets.PROXY_PORT }}"
@@ -75,6 +76,7 @@ jobs:
 
             # .env 파일 생성 (토큰 주입)
             cat > .env <<'EOF'
+            PROXY_ENABLED=${{ secrets.PROXY_ENABLED }}
             PROXY_USER=${{ secrets.PROXY_USER }}
             PROXY_PASS=${{ secrets.PROXY_PASS }}
             PROXY_PORT=${{ secrets.PROXY_PORT }}
