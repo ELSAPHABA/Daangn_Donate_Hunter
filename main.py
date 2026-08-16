@@ -101,6 +101,12 @@ def run_bot() -> None:
     async def area_collection_incremental_job(_context):
         await area_collector.collect_from_next_number()
 
+    try:
+        schedule_tz = ZoneInfo(settings.tz)
+    except Exception:
+        error_logger.warning("[시간대 설정 오류] 잘못된 시간대 '%s', 기본값 'UTC'로 대체합니다.", settings.tz)
+        schedule_tz = ZoneInfo("UTC")
+
     application.job_queue.run_repeating(
         monitor_job,
         interval=settings.scrape_interval_seconds,
@@ -114,7 +120,7 @@ def run_bot() -> None:
     )
     application.job_queue.run_monthly(
         area_collection_full_job,
-        when=time(hour=0, minute=0, tzinfo=ZoneInfo("Asia/Seoul")),
+        when=time(hour=0, minute=0, tzinfo=schedule_tz),
         day=1,
         name="area-db-collector-monthly-full",
         job_kwargs={
@@ -125,7 +131,7 @@ def run_bot() -> None:
     )
     application.job_queue.run_monthly(
         area_collection_incremental_job,
-        when=time(hour=0, minute=0, tzinfo=ZoneInfo("Asia/Seoul")),
+        when=time(hour=0, minute=0, tzinfo=schedule_tz),
         day=10,
         name="area-db-collector-monthly-day10",
         job_kwargs={
@@ -136,7 +142,7 @@ def run_bot() -> None:
     )
     application.job_queue.run_monthly(
         area_collection_incremental_job,
-        when=time(hour=0, minute=0, tzinfo=ZoneInfo("Asia/Seoul")),
+        when=time(hour=0, minute=0, tzinfo=schedule_tz),
         day=20,
         name="area-db-collector-monthly-day20",
         job_kwargs={

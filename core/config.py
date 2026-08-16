@@ -35,6 +35,7 @@ class Settings:
     proxy_rotate_seconds: int = 30 * 60 # 기본값: 15 * 60
     proxy_enabled: bool = True
     user_agent_file: str = "user-agents.txt"
+    tz: str = "UTC"
 
 
 def load_settings() -> Settings:
@@ -45,6 +46,7 @@ def load_settings() -> Settings:
         user_agent_file = ROOT_DIR / user_agent_file
     proxy_enabled_raw = os.getenv("PROXY_ENABLED", "true").strip().lower()
     proxy_enabled = proxy_enabled_raw in {"1", "true", "yes", "on", "t"}
+    tz = os.getenv("TZ", "UTC").strip() or "UTC"
     return Settings(
         telegram_bot_token=os.getenv("TELEGRAM_BOT_TOKEN", "").strip(),
         data_dir=data_dir,
@@ -74,4 +76,5 @@ def load_settings() -> Settings:
         proxy_rotate_seconds=int(os.getenv("PROXY_ROTATE_SECONDS", str(15 * 60))),
         proxy_enabled=proxy_enabled,
         user_agent_file=str(user_agent_file),
+        tz=tz,
     )

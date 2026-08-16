@@ -269,6 +269,7 @@ User-Agent는 `resources/user-agents.txt`에서 읽습니다. 기본적으로 20
 | --- | --- | --- |
 | `TELEGRAM_BOT_TOKEN` | 없음 | Telegram Bot Token, 필수 |
 | `ADMIN_CHAT_IDS` | 빈 값 | 관리자 Telegram chat ID 목록, 쉼표 구분 |
+| `TZ` | `UTC` | 컨테이너 및 스케줄러 기준 시간대 (예: `Asia/Seoul`, `UTC`) |
 | `DATA_DIR` | `data` | JSON 데이터 저장 경로 |
 | `USER_ACTIVITY_LOG` | `user_activity.log` | 사용자 활동 로그 경로 |
 | `ERROR_LOG` | `error.log` | 오류 로그 경로 |
