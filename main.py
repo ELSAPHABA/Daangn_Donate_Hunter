@@ -75,24 +75,6 @@ def run_bot() -> None:
                 BotCommand("help", "도움말"),
             ]
         )
-        task = asyncio.create_task(
-            area_collector.collect_from_next_number(),
-            name="area-db-collector-on-start",
-        )
-        application.bot_data["area_collection_start_task"] = task
-        task.add_done_callback(log_area_collection_task_result)
-
-    def log_area_collection_task_result(task: asyncio.Task) -> None:
-        if task.cancelled():
-            activity_logger.info("[동네DB 수집 시작 작업] 취소됨")
-            return
-        try:
-            exc = task.exception()
-        except asyncio.CancelledError:
-            activity_logger.info("[동네DB 수집 시작 작업] 취소됨")
-            return
-        if exc is not None:
-            error_logger.exception("[동네DB 수집 시작 작업 실패]", exc_info=(type(exc), exc, exc.__traceback__))
 
     application = Application.builder().token(settings.telegram_bot_token).post_init(post_init).build()
     bot = DaangnBot(store, activity_logger, error_logger, settings.error_log, settings.admin_chat_ids)
@@ -135,18 +117,33 @@ def run_bot() -> None:
         when=time(hour=0, minute=0, tzinfo=ZoneInfo("Asia/Seoul")),
         day=1,
         name="area-db-collector-monthly-full",
+        job_kwargs={
+            "misfire_grace_time": 3600,
+            "coalesce": True,
+            "max_instances": 1,
+        },
     )
     application.job_queue.run_monthly(
         area_collection_incremental_job,
         when=time(hour=0, minute=0, tzinfo=ZoneInfo("Asia/Seoul")),
         day=10,
         name="area-db-collector-monthly-day10",
+        job_kwargs={
+            "misfire_grace_time": 3600,
+            "coalesce": True,
+            "max_instances": 1,
+        },
     )
     application.job_queue.run_monthly(
         area_collection_incremental_job,
         when=time(hour=0, minute=0, tzinfo=ZoneInfo("Asia/Seoul")),
         day=20,
         name="area-db-collector-monthly-day20",
+        job_kwargs={
+            "misfire_grace_time": 3600,
+            "coalesce": True,
+            "max_instances": 1,
+        },
     )
     application.run_polling()
 
