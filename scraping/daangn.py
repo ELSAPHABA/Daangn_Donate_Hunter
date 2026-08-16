@@ -174,21 +174,30 @@ class DaangnScraper:
         raise RuntimeError("당근 Remix context JSON 범위를 찾지 못했습니다.")
 
     def _fetch_fleamarket_articles(self, route_data: dict[str, Any], user_agent: str) -> list[dict[str, Any]]:
-        pow_data = route_data.get("pow") or {}
-        current_filters = route_data.get("currentFilters") or {}
-        challenge = str(pow_data["challenge"])
-        difficulty = int(pow_data["difficulty"])
-        nonce = self._solve_pow_nonce(challenge, difficulty)
-        params = self._build_fleamarket_search_params(current_filters, pow_data, nonce)
-        url = f"{DAANGN_ORIGIN}/kr/api/v1/fleamarket/search?{urlencode(params)}"
-        response = self._request_with_retry(
-            url,
-            extra_headers={"Accept": "application/json"},
-            user_agent=user_agent,
-        )
-        data = response.json()
-        articles = data.get("fleamarketArticles", [])
-        return articles if isinstance(articles, list) else []
+        all_page = route_data.get("allPage")
+        if isinstance(all_page, dict):
+            articles = all_page.get("fleamarketArticles") or all_page.get("articles")
+            if isinstance(articles, list):
+                return articles
+
+        pow_data = route_data.get("pow")
+        if isinstance(pow_data, dict) and "challenge" in pow_data and "difficulty" in pow_data:
+            current_filters = route_data.get("currentFilters") or {}
+            challenge = str(pow_data["challenge"])
+            difficulty = int(pow_data["difficulty"])
+            nonce = self._solve_pow_nonce(challenge, difficulty)
+            params = self._build_fleamarket_search_params(current_filters, pow_data, nonce)
+            url = f"{DAANGN_ORIGIN}/kr/api/v1/fleamarket/search?{urlencode(params)}"
+            response = self._request_with_retry(
+                url,
+                extra_headers={"Accept": "application/json"},
+                user_agent=user_agent,
+            )
+            data = response.json()
+            articles = data.get("fleamarketArticles", [])
+            return articles if isinstance(articles, list) else []
+
+        return []
 
     def _build_fleamarket_search_params(
         self,

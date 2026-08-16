@@ -29,6 +29,23 @@ class AreaDatabaseCollector:
         self.mismatch_stop_threshold = max(1, mismatch_stop_threshold)
         self._lock = asyncio.Lock()
 
+    async def collect_from_start(self, start_number: int = 1) -> None:
+        if self._lock.locked():
+            self.activity_logger.info("[동네DB 전면 재수집] 이미 실행 중이어서 이번 실행을 건너뜁니다.")
+            return
+        async with self._lock:
+            start = max(1, int(start_number))
+            self.activity_logger.info(
+                (
+                    "[동네DB 전면 재수집 준비] start_number=%s "
+                    "retry_delay_seconds=%s mismatch_stop_threshold=%s"
+                ),
+                start,
+                self.retry_delay_seconds,
+                self.mismatch_stop_threshold,
+            )
+            await self._collect_until_mismatch(start)
+
     async def collect_from_next_number(self) -> None:
         if self._lock.locked():
             self.activity_logger.info("[동네DB 수집] 이미 실행 중이어서 이번 실행을 건너뜁니다.")

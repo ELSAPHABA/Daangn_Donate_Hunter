@@ -113,7 +113,10 @@ def run_bot() -> None:
     async def monitor_job(_context):
         await monitor.run_once()
 
-    async def area_collection_job(_context):
+    async def area_collection_full_job(_context):
+        await area_collector.collect_from_start(1)
+
+    async def area_collection_incremental_job(_context):
         await area_collector.collect_from_next_number()
 
     application.job_queue.run_repeating(
@@ -128,10 +131,22 @@ def run_bot() -> None:
         },
     )
     application.job_queue.run_monthly(
-        area_collection_job,
+        area_collection_full_job,
         when=time(hour=0, minute=0, tzinfo=ZoneInfo("Asia/Seoul")),
         day=1,
-        name="area-db-collector-monthly",
+        name="area-db-collector-monthly-full",
+    )
+    application.job_queue.run_monthly(
+        area_collection_incremental_job,
+        when=time(hour=0, minute=0, tzinfo=ZoneInfo("Asia/Seoul")),
+        day=10,
+        name="area-db-collector-monthly-day10",
+    )
+    application.job_queue.run_monthly(
+        area_collection_incremental_job,
+        when=time(hour=0, minute=0, tzinfo=ZoneInfo("Asia/Seoul")),
+        day=20,
+        name="area-db-collector-monthly-day20",
     )
     application.run_polling()
 
